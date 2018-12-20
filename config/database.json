@@ -1,0 +1,17 @@
+{
+    "Nex" : {
+        "database" : {
+            "_default" : {
+                "prefix": "",
+                "charset": "utf8",
+                "driver": "mysqli",
+                "type": "mysql"
+            },
+
+            "drivers" : {
+                "mysql"  : "\\Eckinox\\Nex\\Driver\\Database\\Mysql",
+                "mysqli" : "\\Eckinox\\Nex\\Driver\\Database\\Mysqli"
+            }
+        }
+    }
+}

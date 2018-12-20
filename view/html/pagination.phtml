@@ -1,0 +1,21 @@
+<ul class="pagination {{=isset($class) ? $class : ''}}">
+    {{if(isset($pages['previous'])):}}
+    <li>
+        <a href="{{=url::addParam($url, $param, $pagination['previous'])}}" aria-label="Previous">
+            <span aria-hidden="true">{{_'interface.pagination:previous'}}</span>
+        </a>
+    </li>
+    {{endif}}
+    {{foreach($pages as $key => $p):}}
+    {{if(!is_numeric($key))continue;}}
+    <li
+    {{=(isset($active) && $active == $key ? ' class="active"' : '')}}><a href="{{=url::addParam($url, $param, $key)}}">{{=$key}}</a></li>
+    {{endforeach}}
+    {{if(isset($pages['next'])):}}
+    <li>
+        <a href="{{=url::addParam($url, $param, $pagination['next'])}}" aria-label="Next">
+            <span aria-hidden="true">{{_'interface.pagination:next'}}</span>
+        </a>
+    </li>
+    {{endif}}
+</ul>

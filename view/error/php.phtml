@@ -1,0 +1,97 @@
+<style>
+    .php_error { font-family:Arial; font-size:8pt; padding:5px; }
+    .php_error .main_table { border-spacing:3px; width:100%; }
+    .php_error .title td { border:1px solid #AFAEAA; font-size:10pt; font-weight:bold; }
+    .php_error td{ vertical-align:top; font-size:8pt; padding:3px 5px; }
+
+    .php_error .backtrace {width:100%; border-collapse:collapse; border-spacing:0; border:1px solid #AFAEAA; border-top-style:outset; }
+    .php_error .backtrace thead { background-color:#DCD9D4; border:1px solid #AFAEAA; font-weight:bold; }
+    .php_error .backtrace thead td { padding-top:5px; }
+    .php_error .backtrace .even { background-color:#EFEFEF; }
+    .php_error .global-vars { white-space: pre-line; margin-top:10px; }
+    .php_error .global-vars .column { float:left; width:18%; margin:0 1%; }
+</style>
+
+<div class="php_error">
+    <table class="main_table">
+        <tr class="title" style='background-color:<?php echo $color ?>;'>
+            <td colspan='4' style='text-align:center;'><?php echo $message; ?></td>
+        </tr>
+        <tr>
+            <td style='padding:10px 0 0 0;text-align:center;' colspan='4'>
+                <b>File:</b> <?php echo $file; ?>
+            </td>
+        </tr>
+        <tr>
+            <td style='text-align:center;' colspan='4'>
+                <b>Line:</b> <?php echo $line; ?>
+            </td>
+        </tr>
+        <tr>
+            <td colspan='4' style='padding:10px 0 0 0;'>
+                <table class="backtrace">
+                    <thead>
+                        <tr>
+                            <td class="trace" width='5%'>Trace</td>
+                            <td>File</td>
+                            <td width='5%'>Line</td>
+                            <td>Class/Function called</td>
+                            <td>Arguments</td>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <?php
+                        $backtrace = array_slice($backtrace, 4);
+                        $backtrace = array_reverse($backtrace);
+                        $x = 0;
+                        foreach($backtrace as $trace_num => $array)
+                        {
+                            $args = '';
+                            if(isset($array['args']))
+                            {
+                                foreach($array['args'] as $arg) {
+                                   $args .= ErrorHandler::var2text($arg, 500).', ' ;
+                                }
+                                $args = substr($args,0,-2);
+                            }
+
+                            echo '<tr class="'.($x%2?'odd':'even').'">'.
+                                    '<td class="trace">'.($trace_num + 1).'</td>'.
+                                    '<td>'.((isset($array['file'])) ? str_replace(DOC_ROOT, '', $array['file']) : '').'</td>'.
+                                    '<td>'.((isset($array['line'])) ? $array['line'] : '').'</td>'.
+                                    '<td>'.((isset($array['class'])) ? $array['class'].$array['type'] : '').$array['function'].'()</td>'.
+                                    '<td><code>'.$args."</code></td>".
+                                '</tr>';
+
+                            $x++;
+                        }
+                    ?>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <div class="global-vars">
+        <div class="column">
+            <h4>SERVER</h4>
+            <?php echo ErrorHandler::var2text($_SERVER, 1000); ?>
+        </div>
+        <div class="column">
+            <h4>GET</h4>
+            <?php echo ErrorHandler::var2text($_GET, 1000); ?>
+        </div>
+        <div class="column">
+            <h4>POST</h4>
+            <?php echo ErrorHandler::var2text($_POST, 1000); ?>
+        </div>
+        <div class="column">
+            <h4>SESSION</h4>
+            <?php echo ErrorHandler::var2text((isset($_SESSION) ? $_SESSION : null), 1000); ?>
+        </div>
+        <div class="column">
+            <h4>COOKIE</h4>
+            <?php echo ErrorHandler::var2text($_COOKIE, 1000); ?>
+        </div>
+    </div>
+    <br class="clear"/>
+</div>

@@ -1,0 +1,79 @@
+{{ $uid = uniqid(); }}
+<div class="nex-exception-wrapper" data-nex-error-type="{{= $type }}">
+    <input id="nex-exception-detail-show-{{=$uid}}" class="nex-exception-detail-show" type="checkbox">
+    <div class="nex-exception">
+        <label class="nex-exception-lite nex-exception-bar" for="nex-exception-detail-show-{{=$uid}}">
+            <div class="nex-exception-title-msg">{{= $msg; }}</div>
+            <div class="nex-exception-title-file">
+                <div>{{= str_replace('/', '/<wbr>', $file) }}:{{=$line}}</div>
+                <div class="nex-exception-datetime">{{= $datetime }}</div>
+            </div>
+            <div class="nex-exception-clear"></div>
+        </label>
+
+        <label class="nex-exception-overlay" for="nex-exception-detail-show-{{=$uid}}"></label>
+        <div class="nex-exception-detail">
+            <div class="nex-exception-bar">
+                <label class="nex-exception-title" for="nex-exception-detail-show-{{=$uid}}">
+                    <div class="nex-exception-title-msg">{{= $msg; }}</div>
+                    <div class="nex-exception-title-file">
+                        <div>{{=str_replace('/', '/<wbr>', $file)}}:{{=$line}}</div>
+                        <div class="nex-exception-datetime">{{= $datetime }}</div>
+                    </div>
+                    <div class="nex-exception-clear"></div>
+                </label>
+                <label class="nex-exception-close" for="nex-exception-detail-show-{{=$uid}}">X</label>
+                <div class="nex-exception-clear"></div>
+            </div>
+
+            <div class="nex-exception-detail-wrapper">
+                <div class="nex-exception-stacktrace">
+                    <div class="nex-exception-parsed-stacktrace nex-exception-margin">
+                        <label>Stack trace [ error code {{= $errno }} ]</label>
+
+                        {{foreach((array) $stack as $key => $item):}}
+                            <div class="nex-exception-item nex-exception-margin">
+                                <div class="nex-exception-source">
+                                    <div class="nex-exception-function">{{=$this->_function_name($item);}}</div><div class="nex-exception-arguments">{{= trim(json_encode($item['args'], \JSON_PRETTY_PRINT), '[]') }}</div>
+                                    <div class="nex-exception-filewrapper" title="{{=$item['file']}}">
+                                        <span class="nex-exception-filepath-file">{{=$this->_filepath($item);}}</span>:<span class="nex-exception-line">{{=$item['line']}}</span>
+                                    </div>
+                                    <div class="nex-exception-clear"></div>
+                                </div>
+                                {{ if($item['file']): }}
+                                <div class="nex-exception-filesource">
+                                    <label>{{=$this->lang('Nex.errorhandler.html.filesource')}}</label>
+                                    <div class="nex-exception-codeblock">{{ foreach($this->_filesource($item) as $line => $content): }}<div class="nex-exception-srcline {{=$item['line'] == $line ? 'current' : ''}}" data-nex-exception-line="{{= $line }}">{{= "$line $content" }}</div>{{ endforeach }}</div>
+                                </div>
+                                {{ endif }}
+                            </div>
+                        {{endforeach}}
+                    </div>
+                    <div class="nex-exception-raw-stacktrace nex-exception-margin">
+                        <label>Raw Stack trace</label>
+                        <pre>{{= $rawstack }}</pre>
+                    </div>
+                </div>
+
+                <div class="nex-exception-inline">
+                    <div class="nex-exception-request nex-exception-margin">
+                        <label>$_SERVER</label>
+                        <pre>{{=$server}}</pre>
+                    </div>
+                    <div class="nex-exception-request nex-exception-margin">
+                        <label>$_SESSION</label>
+                        <pre>{{= $session ?: "[]" }}</pre>
+                    </div>
+                    <div class="nex-exception-request nex-exception-margin">
+                        <label>$_GET</label>
+                        <pre>{{=$get}}</pre>
+                    </div>
+                    <div class="nex-exception-request nex-exception-margin">
+                        <label>$_POST</label>
+                        <pre>{{=$post}}</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

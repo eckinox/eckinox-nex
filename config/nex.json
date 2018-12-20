@@ -1,0 +1,132 @@
+{
+    "Nex" : {
+        "session": {
+            "expiration": "86400",
+            "name": "NexSession",
+            "gc_probability": "0",
+            "validate": "user_agent",
+            "driver": "_default",
+            "use_only_cookies": "1",
+            "use_trans_sid": "0"
+        },
+
+        "errorhandler" : {
+            "env" : {
+                "production" : {
+                    "error_report" : 6143
+                },
+
+                "development" : {
+                    "error_report" : 8191
+                },
+
+                "install" : {
+                    "error_report" : 32767
+                }
+            },
+
+            "javascript" : {
+                "stacktrace" : 20,
+                "slice" : 3
+            },
+
+            "html" : {
+                "stacktrace" : 20,
+                "slice" : 2
+            },
+
+            "jsonlog" : {
+                "stacktrace" : 20,
+                "slice" : 2,
+                "path"  : null
+            }
+        },
+
+        "cache": {
+            "dir": "",
+            "ext": ".tmp",
+            "driver": "File",
+            "compression": "1",
+            "prefix": "nex_",
+            "drivers": {
+                "Memcache": {
+                    "class" : "\\Eckinox\\Nex\\Driver\\Cache\\Memcache",
+                    "servers": {
+                        "server": {
+                            "host": "localhost",
+                            "port": "11211"
+                        }
+                    }
+                },
+
+                "File" : {
+                    "class" : "\\Eckinox\\Nex\\Driver\\Cache\\File"
+                }
+            }
+        },
+
+        "cookie": {
+            "domain": "",
+            "path": "/",
+            "secure": "",
+            "httponly": "1"
+        },
+
+        "log": {
+            "drivers" : {
+                "file" : {
+                    "active" : false,
+                    "autoload" : "\\Eckinox\\Nex\\Driver\\Log\\File",
+                    "dir" : "log/",
+                    "file_prefix": "{{date('m-Y').'-'}}",
+                    "chmod": "0775",
+                    "priority" : 100
+                },
+
+                "model" : {
+                    "active" : true,
+                    "autoload" : "\\Eckinox\\Nex\\Driver\\Log\\Model",
+                    "priority" : 200
+                }
+            }
+        },
+
+        "migration" : {
+            "autoload_dir" : [ "model" ]
+        },
+
+        "annotation" : {
+            "autoload" : [
+                  {
+                      "namespace" : "Controller",
+                      "search" : "controller/",
+                      "file_extension": [ "php" ]
+                  },
+                  {
+                      "namespace" : "Model",
+                      "search" : "model/",
+                      "file_extension": [ "php" ]
+                  },
+                  {
+                      "namespace" : "Api",
+                      "search" : "api/",
+                      "file_extension": [ "php" ]
+                  }
+            ]
+        },
+
+        "compiler": {
+            "dir": "_cache/",
+
+            "stylesheet": {
+                "consolidate": "1",
+                "minify": "1"
+            },
+
+            "script": {
+                "consolidate": "1",
+                "minify": "1"
+            }
+        }
+    }
+}

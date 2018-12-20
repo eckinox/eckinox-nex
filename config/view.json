@@ -1,0 +1,30 @@
+{
+    "{Nex.view}" : {
+        "ext": "phtml",
+        "cache_dir": "view/",
+        "open_tag": "\\{\\{",
+        "open_echo_tag": "\\{\\{=",
+        "open_lang_tag": "\\{\\{_",
+        "open_slang_tag": "\\{\\{__",
+        "close_tag": "\\}\\}",
+        "func_open_tag": "\\{%=?",
+        "func_close_tag" : "%\\}",
+        "comment_open_tag" : "\\{\\#",
+        "comment_close_tag" : "\\#\\}",
+        "form" : {
+            "security" : {
+                "csrf" : true,
+                "honeypot" : true
+            },
+
+            "fields" : {
+                "csrf" : "form-csrf",
+                "honeypot" : "form-email-validation"
+            },
+
+            "csrf" : {
+              "keep_latest" : 20
+            }
+        }
+    }
+}

@@ -1,0 +1,17 @@
+<script>
+    console.{{=$func}}('{{=$content}}');
+    console.groupCollapsed('[ - Error details - ]');
+        console.groupCollapsed('-- Stack trace ({{=$count['stack']}})--');
+           console.table({{=$stack}});
+        console.groupEnd();
+        console.groupCollapsed('-- \$_SERVER ({{=$count['server']}}) --');
+           console.table({{=$server}});
+        console.groupEnd();
+        console.groupCollapsed('-- \$_GET ({{=$count['get']}})--');
+           console.table({{=$get}});
+        console.groupEnd();
+        console.groupCollapsed('-- \$_POST ({{=$count['post']}}) --');
+           console.table({{=$post}});
+        console.groupEnd();
+    console.groupEnd();
+</script>

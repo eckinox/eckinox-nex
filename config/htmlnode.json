@@ -1,0 +1,60 @@
+{
+    "{Nex.htmlnode}" : {
+        "tags" : {
+            "js" : {
+                "tag"  : "script",
+                "attributes" : { "type" : "text/javascript" }
+            },
+            "css" : {
+                "tag"  : "link",
+                "attributes" : { "rel" : "stylesheet" , "type" : "text/css" }
+            },
+            "!doctype" : {
+                "attributes" : [ "html" ],
+                "options" : { "tag-type" : "single" }
+            },
+            "document" : {
+                "options" : { "no-tag" : true }
+            },
+            "link" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "meta" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "img" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "input" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "br" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "hr" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "iframe" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "area" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "col" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "frame" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "param" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "video" : {
+                "options" : { "tag-type" : "single" }
+            },
+            "wbr" : {
+                "options" : { "tag-type" : "single" }
+            }
+        }
+    }
+}

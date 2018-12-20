@@ -1,0 +1,18 @@
+{
+    "{Nex.errorhandler}" : {
+        "javascript" : {
+            "alert" : {
+                "error"   : "Erreur(s) détectée(s), vérifiez la console Javascript",
+                "warning" : "Avertissement(s) lancée(s) par l'application, vérifiez la console Javascript",
+                "notice"  : "Avis lancée(s) par l'application, vérifiez la console Javascript"
+            }
+        },
+        
+        "html" : {
+            "function" : {
+                "closure" : "Fonction anonyme"
+            },
+            "filesource" : "Fichier sources"
+        }
+    }
+}

@@ -1,0 +1,19 @@
+{
+    "{Nex.mail}": {
+        "_default": {
+            "from": "{{'noreply@'.url::domain((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''), 'domain')}}",
+            "from_name": "{{url::domain((isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : ''), 'domain')}}"
+        },
+        
+        "debug": null
+    },
+    
+    "{Nex.mailer}": {
+        "method": "mail",
+        "host": "localhost",
+        "secure_protocol": "",
+        "user": "",
+        "password": "",
+        "port": ""
+    }
+}

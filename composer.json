@@ -1,0 +1,29 @@
+{
+    "name": "eckinox/nex",
+    "type": "library",
+    "description": "Eckinox's platform of web development.",
+    "authors": [
+        {
+            "name": "Mikaël Laforge",
+            "email": "mlaforge@eckinox.ca"
+        },
+        {
+            "name": "Dave Mc Nicoll",
+            "email": "davem@eckinox.ca"
+        },
+        {
+            "name": "Émile Perron",
+            "email": "emilep@eckinox.ca"
+        },
+        {
+            "name": "Jean-Danyel Routhier",
+            "email": "jd@eckinox.ca"
+        }
+    ],
+    "require": {
+        "php": ">=7.0.0"
+    },
+    "require-dev": {},
+    "autoload": {},
+    "license": "LGPL-3.0"
+}

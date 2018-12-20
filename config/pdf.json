@@ -1,0 +1,27 @@
+{
+    "{Nex.pdf}": {
+        "orientation": "P",
+        "disk_cache": "false",
+        "unit": "mm",
+        "page_format": "A4",
+        "unicode": "true",
+        "encoding": "UTF-8",
+        "pdfa_mode": "false",
+        "user": {
+            "author": "Eckinox",
+            "creator": "Eckinox"
+        },
+        "margin": {
+            "header": "5",
+            "footer": "10",
+            "top": "17",
+            "right": "15",
+            "bottom": "15",
+            "left": "15"
+        },
+        "font": {
+            "name": "helvetica",
+            "size": "10"
+        }
+    }
+}

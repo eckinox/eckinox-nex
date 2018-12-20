@@ -1,0 +1,15 @@
+{
+    "{Nex.router}" : {
+        "routes" : {
+            "nex" : {
+                "autoload" : true,
+                "{method.any}" : {
+                    "/!/tools" : {
+                        "obj" : "\\Eckinox\\Nex\\Controller\\Tools",
+                        "priority" : 100
+                    }
+                }
+            }
+        }
+    }
+}

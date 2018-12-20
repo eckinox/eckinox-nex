@@ -1,0 +1,71 @@
+<style>
+    .nex-exception-wrapper {position: relative;top: 0;font-family:sans-serif;box-sizing:border-box;margin:8px 0;text-align:left;}
+    .nex-exception-wrapper * {box-sizing:inherit}
+
+    .nex-exception-clear {clear:both;}
+    .nex-exception-margin {margin:0 5px 7px 5px}
+
+    .nex-exception-wrapper code,
+    .nex-exception-wrapper pre {white-space:pre-wrap;font-size:11px;margin: 0;}
+    .nex-exception-lite { display:block;cursor:pointer;font-size:12px;line-height:16px; color:#fff; padding:10px}
+
+    .nex-exception-bar {padding: 10px 6px; color: #fff; font-size: 13px;box-shadow: 0px 0px 1px #000 inset;}
+    .nex-exception-bar .nex-exception-title { float:left;width: calc(100% - 30px);padding:5px; }
+    .nex-exception-bar .nex-exception-close { float:right; width:30px;font-size: 20px; text-align:center;}
+    .nex-exception-close {cursor: pointer;}
+
+    .nex-exception-detail {position:fixed;z-index:99999999; left:5vw; right:5vw; top:5vh; bottom:5vh; z-index:100000; padding: 0 1px; background: #181818}
+    .nex-exception-detail-wrapper {clear: both; overflow-y: scroll;clear: both; overflow-y: scroll; max-height: calc(100% - 46px); background: #181818; color: #ccc; font-size: 13px;padding:12px 8px;}
+    .nex-exception-detail-wrapper label {text-transform: uppercase; display: block; background: #ccc; color: #363636; padding: 14px; font-size: 13px; font-weight: bold;}
+    .nex-exception-detail-wrapper pre {background: #3c3c3c;padding: 15px;line-height: 1.75em;color:#fff}
+
+    .nex-exception-detail-show,
+    .nex-exception-detail {display:none;}
+
+    .nex-exception-title {line-height:15px;cursor:pointer;}
+    .nex-exception-title-msg {float:left;}
+    .nex-exception-title-file {float:right;font-size:10px;text-decoration:underline;text-align:right;}
+
+    .nex-exception-parsed-stacktrace { background: #ccc;padding: 0 0 10px 0;}
+
+    .nex-exception-source{color: #242424; padding: 10px 9px; font-size: 14px; border: 1px solid #b1b1b1; background: white;}
+    .nex-exception-item {padding:0 1vw;background: #ccc;border-bottom: 1px solid #aaa; padding-bottom: 15px; margin-bottom: 15px;}
+    .nex-exception-item:last-child{border-bottom:0;}
+    .nex-exception-item label {padding-left:0;}
+    .nex-exception-function,
+    .nex-exception-arguments {display:inline-block;}
+    .nex-exception-arguments:before {content:"(";}
+    .nex-exception-arguments:after {content:")";}
+    .nex-exception-filewrapper {float:right;}
+    .nex-exception-codeblock {background: #fff; padding: 15px; line-height: 1.75em; color: #4d4d4d;font-size:11px;font-family: monospace;overflow: hidden;}
+
+    .nex-exception-srcline {padding-left:5px; padding-right:5px;}
+    .nex-exception-srcline.current { color: #000; padding: 5px 5px;}
+
+    .nex-exception-detail-show:checked + .nex-exception .nex-exception-lite {display:none;}
+    .nex-exception-detail-show:checked + .nex-exception .nex-exception-detail {display:block;}
+    .nex-exception-detail-show:checked + .nex-exception .nex-exception-overlay {position: fixed; cursor:pointer;background: rgba(0,0,0,0.83);z-index:100000;  width: 100%; height: 100%; left: 0; top: 0; bottom: 0; right: 0;}*/
+
+    .nex-exception-raw-stacktrace { background: #ccc; padding: 10px; }
+
+    .nex-exception-request {display:inline-block;width:calc(50% - 10px);vertical-align: top;}
+
+    .nex-exception-inline {font-size:0;}
+    .nex-exception-inline * {font-size:1em;}
+
+    [data-nex-error-type="error"] .nex-exception-srcline.current {background: #ffc2c2;}
+    [data-nex-error-type="error"] .nex-exception-bar,
+    [data-nex-error-type="error"] .nex-exception-lite {background:#bc0000;}
+
+    [data-nex-error-type="warn"] .nex-exception-srcline.current {background: #ffefc2;}
+    [data-nex-error-type="warn"] .nex-exception-bar,
+    [data-nex-error-type="warn"] .nex-exception-lite {background:#b69832;}
+
+    [data-nex-error-type="info"] .nex-exception-srcline.current {background: #c2dfff;}
+    [data-nex-error-type="info"] .nex-exception-bar,
+    [data-nex-error-type="info"] .nex-exception-lite {background:#0072bc;}
+
+    [data-nex-error-type="debug"] .nex-exception-srcline.current {background: #ccc;}
+    [data-nex-error-type="debug"] .nex-exception-bar,
+    [data-nex-error-type="debug"] .nex-exception-lite {background:#555;}
+</style>

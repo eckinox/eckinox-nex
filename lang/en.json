@@ -1,0 +1,17 @@
+{
+    "{Nex.errorhandler}" : {
+        "javascript" : {
+            "alert" : {
+                "error"   : "An error occured, please check your javascript console...",
+                "warning" : "A warning was thrown by the application, please check your javascript console...",
+                "notice"  : "A notice was thrown by the application, please check your javascript console..."
+            }
+        },
+        
+        "html" : {
+            "function" : {
+                "closure" : "Anonymous function"
+            }
+        }
+    }
+}

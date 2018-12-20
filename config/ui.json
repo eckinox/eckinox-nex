@@ -1,0 +1,11 @@
+{
+    "{Nex.ui}" : {
+        "breadcrumb" : {
+            "parent_max_count" : 255
+        },
+
+        "message" : {
+            "type" : [ "all", "error", "warning", "info", "success" ]
+        }
+    }
+}
