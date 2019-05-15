@@ -83,7 +83,7 @@ abstract class date {
      * @return string
      */
     public static function literalDateTime($date, $short = false, $day_week = false) {
-        return self::literalDate($date, $short, $day_week) . ' ' . \Eckinox\Language::get('date.at') . ' ' . self::literalHour($date);
+        return self::literalDate($date, $short, $day_week) . ' ' . Nex::lang('date.at') . ' ' . self::literalHour($date);
     }
 
     /**
@@ -106,7 +106,7 @@ abstract class date {
 
         // Build complete date
         //$fulldate .= self::literalDay($ts)." ".self::literalMonth($ts, $short)." ".self::literalYear($ts, $short);
-        $fulldate .= sprintf(\Eckinox\Language::get('date.literalDate'), self::literalDay($ts), self::literalMonth($ts, $short), self::literalYear($ts, $short));
+        $fulldate .= sprintf(Nex::lang('date.literalDate'), self::literalDay($ts), self::literalMonth($ts, $short), self::literalYear($ts, $short));
 
         return $fulldate;
     }
@@ -157,24 +157,24 @@ abstract class date {
         if ($short == false) {
             switch ($weekday) {
                 case 7:
-                case 0: return \Eckinox\Language::get('date.sun');
-                case 1: return \Eckinox\Language::get('date.mon');
-                case 2: return \Eckinox\Language::get('date.tues');
-                case 3: return \Eckinox\Language::get('date.wed');
-                case 4: return \Eckinox\Language::get('date.thur');
-                case 5: return \Eckinox\Language::get('date.fri');
-                case 6: return \Eckinox\Language::get('date.sat');
+                case 0: return Nex::lang('date.sun');
+                case 1: return Nex::lang('date.mon');
+                case 2: return Nex::lang('date.tues');
+                case 3: return Nex::lang('date.wed');
+                case 4: return Nex::lang('date.thur');
+                case 5: return Nex::lang('date.fri');
+                case 6: return Nex::lang('date.sat');
             }
         } else {
             switch ($weekday) {
                 case 7:
-                case 0: return \Eckinox\Language::get('date.s:sun');
-                case 1: return \Eckinox\Language::get('date.s:mon');
-                case 2: return \Eckinox\Language::get('date.s:tues');
-                case 3: return \Eckinox\Language::get('date.s:wed');
-                case 4: return \Eckinox\Language::get('date.s:thur');
-                case 5: return \Eckinox\Language::get('date.s:fri');
-                case 6: return \Eckinox\Language::get('date.s:sat');
+                case 0: return Nex::lang('date.s:sun');
+                case 1: return Nex::lang('date.s:mon');
+                case 2: return Nex::lang('date.s:tues');
+                case 3: return Nex::lang('date.s:wed');
+                case 4: return Nex::lang('date.s:thur');
+                case 5: return Nex::lang('date.s:fri');
+                case 6: return Nex::lang('date.s:sat');
             }
         }
 
@@ -228,33 +228,33 @@ abstract class date {
         // Check if we return short or long version
         if ($short == true) {
             switch ($month) {
-                case 1: return \Eckinox\Language::get('date.s:jan');
-                case 2: return \Eckinox\Language::get('date.s:feb');
-                case 3: return \Eckinox\Language::get('date.s:march');
-                case 4: return \Eckinox\Language::get('date.s:april');
-                case 5: return \Eckinox\Language::get('date.s:may');
-                case 6: return \Eckinox\Language::get('date.s:june');
-                case 7: return \Eckinox\Language::get('date.s:july');
-                case 8: return \Eckinox\Language::get('date.s:aug');
-                case 9: return \Eckinox\Language::get('date.s:sept');
-                case 10: return \Eckinox\Language::get('date.s:oct');
-                case 11: return \Eckinox\Language::get('date.s:nov');
-                case 12: return \Eckinox\Language::get('date.s:dec');
+                case 1: return Nex::lang('date.s:jan');
+                case 2: return Nex::lang('date.s:feb');
+                case 3: return Nex::lang('date.s:march');
+                case 4: return Nex::lang('date.s:april');
+                case 5: return Nex::lang('date.s:may');
+                case 6: return Nex::lang('date.s:june');
+                case 7: return Nex::lang('date.s:july');
+                case 8: return Nex::lang('date.s:aug');
+                case 9: return Nex::lang('date.s:sept');
+                case 10: return Nex::lang('date.s:oct');
+                case 11: return Nex::lang('date.s:nov');
+                case 12: return Nex::lang('date.s:dec');
             }
         } else {
             switch ($month) {
-                case 1: return \Eckinox\Language::get('date.jan');
-                case 2: return \Eckinox\Language::get('date.feb');
-                case 3: return \Eckinox\Language::get('date.march');
-                case 4: return \Eckinox\Language::get('date.april');
-                case 5: return \Eckinox\Language::get('date.may');
-                case 6: return \Eckinox\Language::get('date.june');
-                case 7: return \Eckinox\Language::get('date.july');
-                case 8: return \Eckinox\Language::get('date.aug');
-                case 9: return \Eckinox\Language::get('date.sept');
-                case 10: return \Eckinox\Language::get('date.oct');
-                case 11: return \Eckinox\Language::get('date.nov');
-                case 12: return \Eckinox\Language::get('date.dec');
+                case 1: return Nex::lang('date.jan');
+                case 2: return Nex::lang('date.feb');
+                case 3: return Nex::lang('date.march');
+                case 4: return Nex::lang('date.april');
+                case 5: return Nex::lang('date.may');
+                case 6: return Nex::lang('date.june');
+                case 7: return Nex::lang('date.july');
+                case 8: return Nex::lang('date.aug');
+                case 9: return Nex::lang('date.sept');
+                case 10: return Nex::lang('date.oct');
+                case 11: return Nex::lang('date.nov');
+                case 12: return Nex::lang('date.dec');
             }
         }
 
@@ -326,7 +326,7 @@ abstract class date {
 
             $nbr_units = floor($time / $unit);
 
-            $str = sprintf(\Eckinox\Language::get('date.agoUnit'), $nbr_units, inflector::plural(\Eckinox\Language::get('date.' . $text), $nbr_units));
+            $str = sprintf(Nex::lang('date.agoUnit'), $nbr_units, inflector::plural(Nex::lang('date.' . $text), $nbr_units));
 
             return $str;
         }

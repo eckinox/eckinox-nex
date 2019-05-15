@@ -10,7 +10,7 @@ use Eckinox\{
 };
 
 trait controller {
-    use views, config;
+    use views, config, asset;
 
     protected $opened_section = false;
 
@@ -120,6 +120,11 @@ trait controller {
         return $breadcrumb ?? $breadcrumb = new Ui\Breadcrumb();
     }
 
+    public function pagination($name, ...$args) {
+        static $pagination = [];
+        return $pagination[$name] ?? $pagination[$name] = ( new Ui\Pagination(...$args) );
+    }
+
     public function message() {
         static $message = null;
         return $message ?? $message = new Ui\Message();
@@ -128,10 +133,10 @@ trait controller {
     public function form_csrf($field, $value) {
         $values = $this->session("Nex.view.form.csrf.$field") ?: [];
 
-        # keeps 20 (from config) latest CSRF key for this form into session,
+        # keeps 20 (from config) latest CSRF key for this form into session,
         # allowing more than one tab opened and preventing information loss
         if ( count($values) >= $this->config('Nex.view.form.csrf.keep_latest') ?: 20 ) {
-            array_pop($values);
+            #array_shift($values);
         }
 
         $values[] = $value;
@@ -141,11 +146,12 @@ trait controller {
         return $value;
     }
 
-    public function form_sent($method = INPUT_POST) {
+
+    public function form_sent($method = INPUT_POST, $skip_token = false, $skip_honeypot = false) {
        $method = $method === INPUT_POST ? "post" : "get";
 
         if ( $valid = request::{"is_".$method}() ) {
-            if ( $this->config('Nex.view.form.security.csrf') ) {
+            if ( ! $skip_token && $this->config('Nex.view.form.security.csrf') ) {
                 $csrf = $this->$method( $this->config('Nex.view.form.fields.csrf') );
 
                 if ( ! is_array($csrf) ) {
@@ -167,7 +173,7 @@ trait controller {
                 }
             }
 
-            if ( $this->config('Nex.view.form.security.honeypot') ) {
+            if ( ! $skip_honeypot && $this->config('Nex.view.form.security.honeypot') ) {
                 if ( $this->$method( $this->config('Nex.view.form.fields.honeypot') )) {
                     $valid = false;
 

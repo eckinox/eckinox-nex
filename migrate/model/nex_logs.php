@@ -3,7 +3,7 @@
 use Eckinox\Nex\Model\Log;
 
 $this->model( new Log() )->create("2018-02-01", function($table) {
-
+    
     return [
         "CREATE TABLE IF NOT EXISTS `$table` (
             `id` int(11) NOT NULL AUTO_INCREMENT,

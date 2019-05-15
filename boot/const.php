@@ -1,5 +1,5 @@
 <?php namespace Eckinox\Nex;
-
+   
 const ERRORHANDLER_LEVEL_ERROR   = 5;
 const ERRORHANDLER_LEVEL_WARNING = 4;
 const ERRORHANDLER_LEVEL_NOTICE  = 3;
@@ -8,12 +8,8 @@ const ERRORHANDLER_LEVEL_DEBUG   = -1;
 const LOG_DIR    = 'log/';
 const VIEW_DIR   = 'view/' ;
 const LAYOUT_DIR = 'view/layout/' ;
-const MIGRATION_DIR  = 'migrate/';
-
-const MIGRATE_APP = "Migrate";
 
 const MODEL_NS   = 'Model';
-const MIGRATION_NS = 'Migrate';
 
 const DB_NOT = false;
 const DB_MATCH_NATURAL = 4;

@@ -95,26 +95,6 @@
             "autoload_dir" : [ "model" ]
         },
 
-        "annotation" : {
-            "autoload" : [
-                  {
-                      "namespace" : "Controller",
-                      "search" : "controller/",
-                      "file_extension": [ "php" ]
-                  },
-                  {
-                      "namespace" : "Model",
-                      "search" : "model/",
-                      "file_extension": [ "php" ]
-                  },
-                  {
-                      "namespace" : "Api",
-                      "search" : "api/",
-                      "file_extension": [ "php" ]
-                  }
-            ]
-        },
-
         "compiler": {
             "dir": "_cache/",
 

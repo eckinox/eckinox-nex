@@ -52,7 +52,7 @@ class Database {
 
         $db_name = $this->config['name'];
 
-        # should fix this mess ->  if ( empty( static::$instances[$db_name] ) )  {
+        # should fix this ->  if ( empty( static::$instances[$db_name] ) )  {
 
             // Load Driver
             $classname = $this->config("Nex.database.drivers.{$this->config['driver']}");

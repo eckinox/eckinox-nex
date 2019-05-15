@@ -242,7 +242,7 @@ abstract class form {
         $attr += array(
             'type' => 'text',
             'name' => $name,
-            'id' => $name,
+            'id' => str_replace(['[', ']'], [ '_', '' ], $name),
             'class' => 'input_text'
         );
 
@@ -473,24 +473,36 @@ abstract class form {
     }
 
     /**
-     * Creates a HTML form text input with datePicker html
+     * Creates a HTML form text input with datePicker javascript
      *
      * @param string $name input name
      * @param string $value default value
+     * @param array	$options other useful options like range. Ex : array('minDate' => '-20', 'maxDate' => '+1M +10D')
      * @param array	$attr input xtra attributes
      */
-    public static function datePicker($name, $value = "", $class = '', $attr = []) {
-       // Make sure attr is array
-       $attr = (!is_array($attr)) ? (array) $attr : $attr;
+    public static function datePicker($name, $value = '', $class = '', $options = [], $attr = []) {
+        $options = (array) $options;
+        $attr['id'] = html::idFromName($name);
 
-       $attr += array(
-           'type' => 'date',
-           'name' => $name,
-           'id' => $name,
-           'class' => 'input_date' . ( $class ? " $class" : "" )
-       );
+        if (empty($options['dateFormat']))
+            $options['dateFormat'] = "yy-mm-dd";
 
-       return self::input($attr, $value);
+        $class .= ' input_date';
+
+        if (!isset($options['constrainInput']))
+            $options['constrainInput'] = 'true';
+        if (!isset($options['changeMonth']))
+            $options['changeMonth'] = 'true'; // Display select for months
+        if (!isset($options['changeYear']))
+            $options['changeYear'] = 'true';  // Display select for years
+
+        $javascript = "<script>" .
+                '$(function(){' .
+                '$("#' . html::jquerySelector($attr['id']) . '").datepicker(' . json_encode($options) . ');' .
+                '});' .
+                "</script>";
+
+        return self::text($name, $value, null, $attr) . $javascript;
     }
 
     /**
@@ -523,31 +535,12 @@ abstract class form {
      *
      * @return string               3 input tag
      */
-    public static function date($name, $timestamp = null, $class = '') {
-        $date = date::timestampToDate($timestamp, 'Y-m-d');
-        $timestamp = date::dateToTimestamp($timestamp);
-        $class .= ' input_date';
-
-        $html = self::hidden($name, $date);
-        $arr = [];
-        $id = html::idFromName($name);
-        $javascript = "document.getElementById('$id').value = document.getElementById('year_" . $id . "').value + '-' + " .
-                "document.getElementById('month_" . $id . "').value + '-' + " .
-                "document.getElementById('day_" . $id . "').value ;";
-
-        // Create year combo box, go back 80 years in the past
-        $selected = (is_long($timestamp)) ? date('Y', $timestamp) : null;
-        $html .= self::selectYear('year_' . $id, array(-40, 40), $selected, $class, array('onchange' => $javascript)) . '/';
-
-        // Create month combo box.
-        $selected = (is_long($timestamp)) ? date('m', $timestamp) : null;
-        $html .= self::selectMonth('month_' . $id, $selected, $class, array('onchange' => $javascript)) . '/';
-
-        // Create days combo box.
-        $selected = (is_long($timestamp)) ? date('d', $timestamp) : null;
-        $html .= self::selectDay('day_' . $id, $selected, $class, array('onchange' => $javascript));
-
-        return $html;
+    public static function date($name, $date = null, $class = '', $attr = []) {
+        return static::input([
+            'name' => $name,
+            'type' => 'date',
+            'class' => "$class input_date",
+        ] + $attr, $date ? date::timestampToDate($date, 'Y-m-d') : null);
     }
 
     /**
@@ -600,7 +593,7 @@ abstract class form {
 
     public static function selectYear($name, $range = array(-10, 10), $value = '', $class = '', $attr = []) {
         $curr_year = date('Y');
-        $options = array('' => \Eckinox\Language::get('interface.-select-'));
+        $options = array('' => Nex::lang('interface.-select-'));
         for ($x = ($curr_year + $range[0]); $x <= ($curr_year + $range[1]); $x++) {
             $options[$x] = $x;
         }
@@ -610,7 +603,7 @@ abstract class form {
 
     public static function selectMonth($name, $value = '', $class = '', $attr = []) {
         // Create days combo box.
-        $options = array('' => \Eckinox\Language::get('interface.-select-'));
+        $options = array('' => Nex::lang('interface.-select-'));
         for ($x = 1; $x <= 12; $x++) {
             if (strlen($x) == 1)
                 $x = '0' . $x;
@@ -622,7 +615,7 @@ abstract class form {
     }
 
     public static function selectDay($name, $value = '', $class = '', $attr = []) {
-        $options = array('' => \Eckinox\Language::get('interface.-select-'));
+        $options = array('' => Nex::lang('interface.-select-'));
         for ($x = 1; $x <= 31; $x++) {
             if (strlen($x) == 1)
                 $x = '0' . $x;
@@ -728,121 +721,21 @@ abstract class form {
     /**
      * Creates an HTML form upload input tag.
      *
-     * @param string                $name - input name
-     * @param bool					$display_max_upload - show maximum size of upload file
-     * @param string                $class - class of input
-     * @param array                	$attr - xtra atributes
-     * @param string				$xtra - xtra string
-     * @return string               Password input tag
+     * @param string    $name - input name
+     * @param string    $class - class of input
+     * @param array     $attr - xtra atributes
+     * @param string    $xtra - xtra string
+     * @return string   File input tag generated
      */
-    public static function file($name, $display_max_upload = false, $class = '', $attr = [], $xtra = '') {
-        $attr += array(
-            'type' => 'file',
-            'name' => $name,
+    public static function file($name, $class = '', $attr = [], $xtra = '') {
+        return self::input([
             'id' => $name,
-            'class' => 'input_file',
-        );
-
-        $attr['class'] .= ' ' . $class;
-
-        return self::input($attr, '', $xtra) . (($display_max_upload == true) ? "<p class='_max_upload_size'>" . \Eckinox\Language::get('interface.uploadMax') . " : " . (NEX_MAX_UPLOAD_SIZE / 1024 / 1024) . ' ' . \Eckinox\Language::get('interface.mo') . "</p>" : '');
+            'name' => $name,
+            'type' => 'file',
+            'class' => "input_file $class",
+        ] + $attr, '', $xtra);
     }
 
-    /**
-     * Creates an editor instance
-     * @todo DEPRECIATED Use Editor librairie instead
-     *
-     * @param string                $name - input name
-     * @param string                $value - value of input
-     * @param string                $toolbar - toolbar of instance
-     * @param string                $height - height of instance
-     * @param string                $width - width of instance
-     * @param array					$file_manager_params - GET params that will be passed to File uploader
-     */
-    public static function editor($name, $value = '', $toolbar = 'full', $height = '250px', $width = '100%', $file_manager_params = []) {
-        $editor = Nex::config('site.editor');
-
-        switch ($editor) {
-            // Does not work with dialog
-            case 'tinymce':
-                $html = self::textarea($name, $value) .
-                        "<script type='text/javascript' defer='defer'>" .
-                        "if (tinyMCE.getInstanceById(" . $name . ") != null){" .
-                        "tinyMCE.execCommand('mceRemoveControl', true, id);" .
-                        "}\n" .
-                        "$('document').ready(function(){\n";
-
-                $editor = "tinyMCE.init({" .
-                        'mode : "exact", ' .
-                        'elements : "' . $name . '", ' .
-                        'width : "' . $width . '", ' .
-                        'height : "' . $height . '", ' .
-                        'content_css : "' . url::site(PUB_PATH . GLOBAL_PATH . "css/reset.css", false) . ',' . url::site(PUB_PATH . Nex::config('apps._default', true) . "css/style.css", false) . '" ' .
-                        "});\n";
-
-                $html .= $editor .
-                        "});\n" .
-                        "</script>";
-                break;
-
-            case 'ckeditor':
-            default :
-                $html = self::textarea($name, $value) .
-                        "<script type='text/javascript' defer='defer'>" .
-                        "var e = CKEDITOR.instances['" . $name . "']; " .
-                        "if(e){ CKEDITOR.remove(e); e = null; }\n" .
-                        "$('document').ready(function(){\n";
-
-                $editor = "$('#$name').ckeditor({" .
-                        //"CKEDITOR.replace('".$name."', {".
-                        "toolbar : '" . ucfirst($toolbar) . "', " .
-                        "uiColor : '#D7DBDC', " .
-                        //"skin : 'v2', ".
-                        "height : '$height', " .
-                        "width : '$width', " .
-                        "filebrowserBrowseUrl : \"" . url::site("uploader/window/index", true) . (!empty($file_manager_params) ? "?" . arr::implode('&', '=', $file_manager_params) : '') . "\", " .
-                        //"filebrowserUploadUrl : '".URL."uploader/window/index".Nex::config('url.ext')."', ".
-                        "contentsCss : [ \"" . url::site(PUB_PATH . GLOBAL_PATH . "css/reset.css", false) . "\", \"" . url::site(PUB_PATH . Nex::config('apps._default', true) . "css/style.css", false) . "\"] " .
-                        "});";
-
-                $html .= $editor .
-                        "});\n" .
-                        "</script>";
-                break;
-        }
-
-        return $html;
-    }
-
-    /**
-     * Create a box displaying rows. Rows are selectable. A hidden field
-     * Keep value of rows. Display can be edit with css. Class 'selectable' and 'selected'
-     *
-     * @param string $name - input name
-     * @param array	$options - option array Value => Row Html
-     * @param string $selected - selected value
-     * @param string $class - class of container
-     *
-     * @uses javascript::select()
-     */
-    public static function selectList($name, $options = NULL, $selected = NULL, $class = '', $attr = []) {
-        $onclick = isset($attr['onclick']) ? $attr['onclick'] : '';
-
-        // Create hidden input
-        $html = self::hidden($name, $selected);
-        $html .= "<div id=\"select_list_$name\" class=\"select_list\">";
-
-        // Build each rows
-        foreach ((array) $options as $id => $row) {
-            $html .= "<div id=\"" . $id . "\" class=\"select_row " . (($selected == $id) ? 'selected' : 'selectable') . " $class\" onClick=\"select(this, 'selected', '$name', '$id'); " . str_replace('%%ID%%', $id, $onclick) . " \" >" .
-                    $row .
-                    "</div>";
-        }
-
-        $html .= "</div>";
-
-        return $html;
-    }
 
     /**
      * Creates an HTML form textarea tag.
@@ -862,8 +755,6 @@ abstract class form {
         );
 
         $attr['class'] .= ($class != '') ? ' ' . $class : $class;
-
-
         return '<textarea' . self::attributes($attr, 'textarea') . ' ' . $xtra . '>' . $value . '</textarea>';
     }
 
@@ -931,103 +822,13 @@ abstract class form {
      * @param array                	$attr - extra attributes
      * @return string               Html checkbox
      */
-    public static function checkbox($name, $value = '', $checked = false, $class = '', $attr = []) {
-        $id = html::idFromName($name);
-
-        $attr += array(
-            'name' => $name,
-            'id' => $id,
-            'class' => 'input_check',
-        );
-
-        $attr['class'] .= ($class != '') ? ' ' . $class : '';
-        $attr['type'] = 'checkbox';
-
-        if ($checked === true || $value === $checked) {
-            $attr['checked'] = 'checked';
-        }
-
-        return self::input($attr, $value);
-    }
-
-    public static function checkboxes($name, $options, $value = '', $class = '', $attr = []) {
-        $value = (array) $value;
-        $id = html::idFromName($name);
-        $html = '<div class="input-set checkbox-set">';
-        $x = 0;
-        foreach ($options as $val => $label) {
-            $attr['id'] = html::idFromName($id . $x);
-
-            $is_checked = false;
-            if (in_array($val, $value)) {
-                $is_checked = true;
-            }
-
-            $html .= self::checkbox($name . '[]', $val, $is_checked, $class, $attr) . '<label for="' . $attr['id'] . '">' . $label . '</label>';
-            $x++;
-        }
-
-        $html .= '</div>';
-
-        return $html;
-    }
-
-    /**
-     * Creates a checkbox list
-     * Use html array notation - This method needs jQuery to work and its plugin shiftClick()
-     *
-     * @param string $name id and name of inputs
-     * @param array|string $value values of checkbox - should be 'Value of checkbox' => 'Text of label'
-     * @param array|bool $checked array that should match with $value count() to tell if they are checked or not
-     * @param string $class class that will be given to table
-     * @param array $attr - extra attributes
-     * @return string Html checkbox list
-     */
-    public static function checkBoxList($name, $value = [], $checked = [], $class = '', $attr = []) {
-        // Init
-        $checked = (array) $checked;
-        $value = (array) $value;
-
-        $id = html::idFromName($name);
-
-        $html = '<div id="check-box-list-' . $id . '" class="check-box-list list ' . $class . '">';
-        $html .= '<ul>';
-
-        $x = 0;
-        foreach ($value as $val => $label) {
-            $attr['id'] = html::idFromName($id . $x);
-
-            $class = '';
-            $is_checked = false;
-            if (in_array($val, $checked)) {
-                $class = 'selected';
-                $is_checked = true;
-            }
-
-            $html .= '<li class="' . $class . ' ' . text::alternate('even', 'odd') . '"><span>' . self::checkbox($name . '[]', $val, $is_checked, '', $attr) . '<label for="' . $attr['id'] . '">' . $label . '</label></span></li>';
-
-            $x++;
-        }
-
-        $html .= '</ul>';
-        $html .= '</div>';
-
-        $js = '<script>
-				$("#check-box-list-' . $id . ' li input").change(function(e){
-					var cb = this;
-					var parent = $(this).parent().parent();
-					if ( cb.checked ) {
-						parent.addClass("selected");
-					}
-					else {
-						parent.removeClass("selected");
-					}
-				});
-
-                $("#check-box-list-' . $id . ' li input").shiftClick();
-            </script>';
-
-        return $html . $js;
+    public static function checkbox($name, $value = '', $checked = false, $class = '', $attr = [], $xtra = "") {
+       return static::input( ( $checked ? ['checked' => "checked"] : []) + [
+           'type' => 'checkbox',
+           'class' => "input_check $class",
+           'name' => $name,
+           'id' => $attr['id'] ?? html::idFromName($name),
+       ] + $attr, $value, $xtra);
     }
 
     /**
@@ -1041,43 +842,12 @@ abstract class form {
      * @return string Html radio button
      */
     public static function radio($name, $value = '', $checked = false, $class = '', $attr = [], $xtra = '') {
-        $id = html::idFromName($name);
-
-        $attr += array(
+        return static::input( ( $checked ? ['checked' => "checked"] : []) + [
+            'type' => 'radio',
+            'class' => "input_radio $class",
             'name' => $name,
-            'id' => $id,
-            'class' => 'input_radio',
-        );
-
-        $attr['class'] .= ($class != '') ? ' ' . $class : '';
-        $attr['type'] = 'radio';
-
-        if ($checked === true || $value === $checked) {
-            $attr['checked'] = 'checked';
-        }
-
-        return self::input($attr, $value, $xtra);
-    }
-
-    public static function radios($name, $options, $value = '', $class = '', $attr = []) {
-        $id = html::idFromName($name);
-        $html = '<div class="input-set radio-set">';
-        $x = 0;
-        foreach ($options as $val => $label) {
-            $attr['id'] = html::idFromName($id . $x);
-
-            $is_checked = false;
-            if ($val == $value) {
-                $is_checked = true;
-            }
-
-            $html .= self::radio($name, $val, $is_checked, $class, $attr) . '<label for="' . $attr['id'] . '">' . $label . '</label>';
-            $x++;
-        }
-
-        $html .= '</div>';
-
-        return $html;
+            'id' => $attr['id'] ?? html::idFromName($name),
+        ] + $attr, $value, $xtra);
     }
 
     /**
@@ -1091,8 +861,8 @@ abstract class form {
      */
     public static function submit($name, $value = '', $class = 'submit_button', $attr = []) {
         $attr += array(
-            'name' => $name,
             'id' => $name,
+            'name' => $name,
             'class' => 'input_submit'
         );
 

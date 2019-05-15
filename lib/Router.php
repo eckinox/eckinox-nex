@@ -4,6 +4,7 @@ namespace Eckinox\Nex;
 
 use Eckinox\{
     Arrayobj,
+    Annotation,
     config,
     singleton
 };

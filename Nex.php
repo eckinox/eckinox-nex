@@ -57,7 +57,7 @@ class Nex extends Component {
                 if ( $definition['route'] ?? false ) {
                     $m = $definition['route']['method'] ?? Router::ANY;
                     $uri = is_array($definition['route']) ? $definition['route']['uri'] : $definition['route'];
-                    $router->add_route($uri, $this->_render_callback("$class->$method"), $m);
+                    $router->add_route($uri, $this->_render_callback("$class->$method", $definition['name']), $m);
                 }
             }
         }
@@ -94,15 +94,17 @@ class Nex extends Component {
         }
     }
 
-    protected function _render_callback($obj) {
+    protected function _render_callback($obj, $route_name = "") {
         if ( strstr($obj, '::') !== false ) {
             return explode('::', $obj);
         }
         elseif ( strstr($obj, '->') !== false ) {
             list($obj, $function) = explode('->', $obj);
 
-            return function(...$arguments) use ($obj, $function) {
-                return (new $obj)->$function(...$arguments);
+            return function(...$arguments) use ($obj, $function, $route_name) {
+                $obj = new $obj();
+                $obj->url_current = $route_name;
+                return $obj->$function(...$arguments);
             };
         }
         # @todo A better way should be implemented here to differenciate those two  ^ v
@@ -131,11 +133,10 @@ class Nex extends Component {
 
             #if ( ! request::is_ajax() ) {
 #                $handler->register( new JsonLog($this->config('Nex.errorhandler.jsonlog')) );
-                $handler->register( new JavascriptConsole($this->config('Nex.errorhandler.javascript')) );
                 $handler->register( new Html($this->config('Nex.errorhandler.html')) );
+                $handler->register( new JavascriptConsole($this->config('Nex.errorhandler.javascript')) );
             #}
-            #else {
-                #$handler->register( new JavascriptConsole($this->config('Nex.errorhandler.javascript')) );
+        #    else {
                 # $handler->register( new AjaxResponse($this->config('Nex.errorhandler.ajax')) );
             #}
         }

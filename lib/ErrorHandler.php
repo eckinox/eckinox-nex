@@ -63,7 +63,7 @@ class ErrorHandler extends Driver\ErrorHandler {
     }
 
     public static function fatal_error($error_no) {
-        return (bool)( $error_no & ( \E_ERROR | \E_PARSE | \E_CORE_ERROR | \E_COMPILE_ERROR | \E_RECOVERABLE_ERROR ) );
+        return (bool)($error_no & ( \E_ERROR | \E_PARSE | \E_CORE_ERROR | \E_COMPILE_ERROR | \E_RECOVERABLE_ERROR ));
     }
 
     public function handle_exception($ex) {
@@ -71,9 +71,11 @@ class ErrorHandler extends Driver\ErrorHandler {
     }
 
     public function handle_error( $errno, $errstr, $errfile, $errline, $context = [], $backtrace = null ) {
-        if ( $errno & error_reporting() ) {
+        if ($errno & error_reporting()) {
             $this->output($errno, $errstr, $errfile, $errline, $backtrace);
-            #return true;
+        }
+        else {
+            return false;
         }
 
         return false;

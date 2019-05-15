@@ -24,10 +24,14 @@ class View_function {
 
     protected $event;
 
+    protected $section_name = [];
+
     protected $listen_on = [
         'foreach'    => "foreach_function",
         'or'         => "or_function",
         'endforeach' => "endforeach_function",
+        'for'        => "for_function",
+        'endfor'     => "endfor_function",
         'if'         => "if_function",
         'else'       => "else_function",
         'elseif'     => "elseif_function",
@@ -46,11 +50,14 @@ class View_function {
         'default'    => "default_function",
         'endswitch'  => "endswitch_function",
         'url'        => "url_function",
-        'route'      => "url_route_function",
+        'route'      => "route_function",
         'dump'       => "dump_function",
         'form'       => "form_function",
         'endform'    => "endform_function",
+        'asset'      => "asset_function",
+        'popup'      => "popup_function",
     ];
+
 
     public function __construct($controller) {
         $this->uid = uniqid();
@@ -68,6 +75,27 @@ class View_function {
         foreach($this->listen_on as $key => $unused) {
             $this->event->off("Nex.view.function.$key", $this->uid);
         }
+    }
+
+    public static function build_section($name, $section_list) {
+
+        foreach([ 'prepend', 'default', 'append' ] as $item) {
+            $stack = $section_list[$item] ?? [];
+
+            usort($stack, function($a, $b) {
+                return $a['order'] <=> $b['order'];
+            });
+
+            foreach($stack as $section) {
+                $section['callback']();
+
+                # We quit after first print if this is the default value
+                if ( $item === 'default' ) {
+                    break 1;
+                }
+            }
+        }
+
     }
 
     public function view_function($e, $path) {
@@ -121,6 +149,36 @@ class View_function {
         }
 
         array_pop($this->foreach_state);
+    }
+
+    public function for_function($e, $args) {
+        $e->stop_propagation();
+/*
+        $unique_var = "$".uniqid("foreach_");
+
+        $this->for_state[] = [
+            'or'   => false,
+            'unique_var' => $unique_var,
+        ];
+*/
+        $e['output'] = "<?php for ($args):?>"; # {$unique_var} = true; ";
+    }
+
+    public function endfor_function($e) {
+        $e->stop_propagation();
+
+        $e['output'] = "<?php endfor; ?>";
+        /*
+        $current = end($this->foreach_state);
+
+        if ( $current['or'] === false ) {
+            $e['output'] = "<?php endfor; ?>";
+        }
+        else {
+            $e['output'] = "<?php endif; ?>";
+        }
+
+        array_pop($this->foreach_state);*/
     }
 
     public function if_function($e, $args) {
@@ -201,13 +259,14 @@ class View_function {
     public function section_function($e, $name) {
         $e->stop_propagation();
         $split = explode('=>', $name, 2);
-
+        $order = 0;
         $name = array_shift($split);
+        $key = 'default';
 
         if ( $split ) {
             $param = json_decode(trim($split[0]), true);
 
-            if (json_last_error()) {
+            if ( json_last_error() ) {
                 trigger_error("dev: There seem to be a problem with your JSON section's arguments '$name'.", E_USER_WARNING );
             }
             else {
@@ -219,9 +278,18 @@ class View_function {
                     $vars = "[" . ( isset($vars) ? implode(',', $vars) : "" ) . "]";
                     $lang = $this->lang_function($e, "'{$param['lang_key']}', $vars");
                 }
+
+                if ( $append = $param['append']  ?? false ) {
+                    $key = "append";
+                }
+
+                if ( $prepend = $param['prepend'] ?? false ) {
+                    $key = "prepend";
+                }
+
+                $order = $param['order'] ?? 0;
             }
         }
-
 
         # Useful to debug unclosed sections from views
         # @todo !
@@ -229,24 +297,30 @@ class View_function {
 
         # Adding defined vars into each views
         $this->section_uid = '$'.uniqid("nex_view_var");
+        $this->section_name[] = $name;
 
-        $e['output'] = "<?php {$this->section_uid} = get_defined_vars();";
+        $e['output'] = "<?php {$this->section_uid} = get_defined_vars(); \$this->section[$name] ?? \$this->section[$name] = [];";
 
-        if ( ! $this->extended ) {
-            $e['output'] .= " ( \$this->section[$name] ?? ";
-        }
-        else {
-            $e['output'] .= " \$this->section[$name] ?? \$this->section[$name] = ";
-        }
+        #if ( ! $this->extended ) {
+        #    $e['output'] .= " !empty( \$this->section[$name] ) ? " .
+        #        " \Eckinox\Nex\View_function::build_section($name, \$this->section[$name]) : (";
+        #}
+        #else {
+            $e['output'] .= " \$this->section[$name]['$key'] ?? \$this->section[$name]['$key'] = [];".
+                " \$this->section[$name]['$key'][] = [ 'order' => '$key' === 'default' ? count(\$this->section[$name]['$key']) : $order, 'callback' => ";
+        #}
 
-        $e['output'] .= "function() use ({$this->section_uid}) { ".
-                        "extract({$this->section_uid}); ?>".
-                        ( $lang ?? "" );
+        $e['output'] .= "function() use ({$this->section_uid}) { extract({$this->section_uid}); ?>".
+            ( $lang ?? "" );
     }
 
     public function end_section_function($e) {
         $e->stop_propagation();
-        $e['output'] = ! $this->extended ? "<?php })(); unset({$this->section_uid}) ?>" : "<?php } ?>";
+        /*$e['output'] = "<?php }]; ?>";
+        $e['output'] = ! $this->extended ? "<?php })(); unset({$this->section_uid}) ?>" : "<?php }]; ?>";*/
+        $name = array_pop($this->section_name);
+        $uid = $this->section_uid;
+        $e['output'] = ( ! $this->extended ? "<?php }]; \Eckinox\Nex\View_function::build_section($name, \$this->section[$name]); " : "<?php }];" ) . " unset($uid) ?>";
     }
 
     public function url_function($e, $param) {
@@ -258,7 +332,7 @@ class View_function {
     public function route_function($e, $param) {
         $e->stop_propagation();
 
-        $e['output'] = '<?php echo $this->url_route('.$param.'); ?>';
+        $e['output'] = '<?php echo $this->url_from_name('.$param.'); ?>';
     }
 
     public function dump_function($e, $param) {
@@ -300,6 +374,11 @@ class View_function {
         )."</form>";
     }
 
+    public function asset_function($e, $param) {
+        $e->stop_propagation();
+        return $e['output'] = "<?php echo \$this->asset($param) ?>";
+    }
+
     public function lang_function($e, $param) {
         $e->stop_propagation();
 
@@ -336,5 +415,10 @@ class View_function {
     public function putlang_function($e, $param) {
         $e->stop_propagation();
         return $e['output'] = "<?php echo \$this->_($param); ?>";
+    }
+
+    public function popup_function($e, $args) {
+        $e->stop_propagation();
+        return $e['output'] = "<?php echo \$this->popup($args); ?>";
     }
 }

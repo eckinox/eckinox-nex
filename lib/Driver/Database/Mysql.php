@@ -8,7 +8,7 @@ use \mysql_connect,
     \mysql_real_escape_string,
     \mysql_error,
     \mysql_select_db;
-    
+
 use Eckinox\Nex,
     Eckinox\Nex\Model,
     Eckinox\Nex\arr;
@@ -22,7 +22,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
      * @return $this
      */
     public function from(array $table_keys, $is_query = false, $func = 'array_push') {
-        
+
         # Add to instance's FROM array
         foreach ($table_keys as $table_key) {
             if (($table_key = trim($table_key)) === '')
@@ -32,11 +32,11 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
                 $func($this->from, $table_key);
                 continue;
             }
-            
+
             $end = '';
-            
+
             $table_key = explode('->', str_replace(' ', '', $table_key));
-            
+
             if (isset($table_key[1])) {
                 $alias = $table_key[1];
                 $this->table_alias[] = $alias;
@@ -72,7 +72,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
         }
         else {
             $table = array_shift($table_key);
-        
+
         }
 
         // Build condition
@@ -82,7 +82,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
             $tmp[] = $k . ' = ' . $v;
         }
         $fields = $tmp;
-        
+
         $sql = ((empty($type)) ? 'JOIN ' : $type . ' JOIN ') . $table . " ON (" . implode(' AND ', $fields) . ')';
         $this->from[] = array('type' => 'JOIN', 'sql' => $sql);
 
@@ -449,7 +449,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
             $values[] = '(' . implode(',', $row) . ')';
         }
 
-        
+
         $sql = 'REPLACE INTO ' . $table . ' (`' . implode('`, `', $keys) . '`) VALUES ' . implode(',', $values);
 
         return $sql;
@@ -457,7 +457,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
 
     /**
      * Compile an autoincrement reset sql query
-     * 
+     *
      * @param table_key  Table to reset autoincrement
      * @param value      New value to set autoincrement
      */
@@ -492,7 +492,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
      */
     public function select_build_query() {
         $sql = [];
-        
+
         $sql[] =  'SELECT ' . ($this->distinct ? 'DISTINCT ' : '') . (($this->select === []) ? '*' : implode(', ', $this->select));
         $sql[] = ' FROM ' . $this->build_from();
         $sql[] = implode(' ', $this->join) . ' ';
@@ -510,7 +510,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
 
     public function build_from() {
         $sql = [];
-        
+
         foreach ($this->from as $arr) {
             if (is_string($arr)) {
                 $sql[] = $arr . ' ';
@@ -522,7 +522,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
                 $sql[] = ($arr['type'] == 'JOIN' ? $arr['sql'] : ', ' . $arr['sql']) . ' ';
             }
         }
-        
+
         return implode('', $sql);
     }
 
@@ -568,7 +568,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
 
     /**
      * Return next ID to be inserted into a table which has an auto-increment field
-     * 
+     *
      * @return string Next id, or False if no auto-increment field were found
      */
     public function nextInsertId($table_name) {
@@ -616,7 +616,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
 
         return $this->rows;
     }
-    
+
     /**
      * This function connects to the database using the Parameters or the default config
      * @param string $database key of database in config
@@ -635,7 +635,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
             throw new Exception(mysql_error(), E_USER_ERROR);
             return false;
         }
-        
+
         if ($this->config['charset']) {
             mysql_set_charset($this->config['charset'], $this::$connection[$this->database]);
         }
@@ -676,12 +676,12 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
         $arr_key = (array) $arr_key;
 
         foreach ($arr_key as $key) {
-            
+
             if ( $model = Model::informations(is_object($key) ? $key->model_key : $key) ) {
                 $arr_table[] = isset($model['tablename']) ? $model['tablename'] : "";
             }
-            
-            #$arr_table[] = 
+
+            #$arr_table[] =
             #$arr_table[] = static::escapeField($key, $prefix, $this->table_alias, TRUE, $quotes);
         }
 
@@ -778,12 +778,12 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
      */
     public static function escapeField($value, $prefix = '', $alias = [], $consider_table = FALSE, $quotes = NEX_BACKTICK) {
         $table_trick = ($consider_table == FALSE) ? 1 : 0;
-        
-        
+
+
         $was_array = (is_array($value)) ? true : false;
         $value = (array) $value;
         $tmp = [];
-        
+
         foreach ($value as $val) {
             if ($val == '*') {
                 $tmp[] = $val;
@@ -828,7 +828,7 @@ class Mysql extends \Eckinox\Nex\Driver\Database {
                 }
             }
 
-            
+
             $tmp[0] = $val;
 
             /* $boom = explode('.', trim(str_replace($quotes, '', strval($val))));

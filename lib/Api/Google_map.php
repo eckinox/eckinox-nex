@@ -1,7 +1,4 @@
 <?php
-
-namespace Eckinox\Nex\Api;
-
 /**
  * Google map class api
  * @version 1.0.0
@@ -14,7 +11,7 @@ namespace Eckinox\Nex\Api;
 define("GOOGLE_MAP_API_GEOCODE", "http://maps.googleapis.com/maps/api/geocode/json"); // Format will be replaced by xml or json
 define("GOOGLE_MAP_API_STATICMAP", "https://maps.googleapis.com/maps/api/staticmap");
 
-class Google_map
+class Itremma_Nex_App_Api_Google_map
 {
     protected $address ;
     protected $lat, $lng ;

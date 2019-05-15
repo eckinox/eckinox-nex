@@ -92,12 +92,6 @@ class Eckinox {
         )));
     }
 
-    public function call_image($call, $param = []) {
-        return $this->call(implode('/', [
-            '', $this->_get_path('image'), $call
-        ]), $param);
-    }
-
     /**
      * Debug helper, will output every calls made from this API wrapper (for this request)
      * @return array

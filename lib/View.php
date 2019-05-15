@@ -11,52 +11,52 @@ use Eckinox\Eckinox,
 
 class View {
     use config, lang;
-
+    
     const DEFAULT_EXT = "phtml";
 
     // Added vars to template
     protected $vars = [];
-
+    
     protected static $global_vars = [];
-
+    
     // View that share vars data
     protected $shares = [];
-
+    
     // Path to app
     protected $app_path;
-
+    
     // Full path to template
     protected $full_path;
 
     // Original path given as parameter
     protected $given_path;
-
+    
     // Original object
     protected $given_object;
-
+    
     // View path
     protected $view_path;
-
+    
     // Cache path
     protected $cache_path;
-
+    
     // Can be like 16/my_template.phtml.php
-    protected $cache_key;
-
+    protected $cache_key; 
+    
     // Extension used for views
     protected $ext;
-
+    
     // Configuration of view
     protected $config;
-
+    
     // Lang file used
     protected $lang_file;
-
+    
     // Lang vars passed at every call
     protected $lang_vars = [];
 
     protected $component = "";
-
+    
     /*
      * Create a new instance of the class
      * Store the include path
@@ -68,24 +68,24 @@ class View {
     public function __construct($file_path, $object) {
         $this->given_path = $original_path = $file_path;
         $this->given_object = $object;
-
+        
         $this->component = apps::component_of($object)[0];
-
+        
         $this->config = $this->config('Nex.view');
 
         $this->ext = ( $this->config['ext'] !== null ) ? $this->config['ext'] : static::DEFAULT_EXT;
-
+        
         $this->view_path = "$file_path.{$this->ext}";
 
         $file_path = apps::find_from($object, VIEW_DIR, $this->view_path);
-
+        
         if (!$file_path || !is_file($file_path)) {
             throw new Exception('View file could not be found : "' . $this->view_path . '" ', NEX_E_VIEW_LOAD);
             return false;
         }
 
         $this->cache_key = static::cache_name($file_path, $original_path);
-
+        
         $this->full_path = $file_path;
     }
 
@@ -97,23 +97,23 @@ class View {
         return $this->original_full_path;
     }
 
-    public function inlineView($path, $vars = []) {
+    public function inlineView($path, $vars = []) {        
         return $this->view($path, $vars);
     }
-
+    
     /**
      * Render a view in a view
      */
     public function view($path, $vars = []) {
-
+        
         if ( substr($path, 0, 1) !== '/' ) {
             $path = substr($this->given_path, 0, strrpos($this->given_path, '/'))."/".$path;
         }
-
+        
         $view = new static($path, $this->given_object);
         $view->assign(array_merge($this->vars, $vars));
         $view->setLangFile($this->lang_file);
-
+        
         return $view->render();
     }
 
@@ -122,7 +122,7 @@ class View {
      * Does it only if compiled file doesnt exist or is older then view file
      */
     public function compile($use_cache = false) {
-
+                
         // Cache file creation, stop compilation if cache file recent enought exist
         $cache_path = Eckinox::path_tmp() . $this->config['cache_dir'] . dirname($this->cache_key) . DIRECTORY_SEPARATOR;
         $cache_file = basename($this->cache_key) .".phtml";
@@ -133,7 +133,7 @@ class View {
         if ( ! file_exists($cache_path) ) {
             mkdir($cache_path, 0775, true);
         }
-
+        
         if ( $use_cache ) {
             if ( file_exists( $this->full_path ) ) {
                return true;
@@ -141,7 +141,7 @@ class View {
         }
 
         $view_content = $this->_handle_custom_tags(file_get_contents($view_path));
-
+        
         $handler = fopen($this->full_path, 'w');
         fwrite($handler, $view_content);
         fclose($handler);
@@ -224,7 +224,7 @@ class View {
 
         return $var;
     }
-
+    
     public function vars() {
         return $this->vars;
     }
@@ -242,7 +242,7 @@ class View {
         ob_start();
 
         $this->compile( ! Eckinox::debug() );
-
+        
         if ($this->config('Eckinox.system.debug.view'))
             echo "<script>console.log('{$this->original_full_path}')</script>";
 
@@ -272,11 +272,11 @@ class View {
     public function setLangVars($vars = []) {
         $this->lang_vars = $vars;
     }
-
+    
     public function given_path($set = null) {
         return $set === null ? $this->given_path : $this->given_path = $set;
     }
-
+    
     public function relative_path($path = "", $fallback_path) {
         return substr($path, 0, 1) !== '/' ? substr($this->given_path, 0, strrpos($this->given_path, '/'))."/".$path : $fallback_path;
     }
@@ -291,33 +291,33 @@ class View {
     protected function _handle_custom_tags($html) {
         # handles comments "{# this is a comment #}"
         $html = preg_replace("#({$this->config['comment_open_tag']})(.*?)({$this->config['comment_close_tag']})#s", "", $html);
-
+        
         # handles "{{_'langkey' .." and "{{__'langkey' " cases
         $html = preg_replace("/(?<!\{\\\})({$this->config['open_slang_tag']})\s*(.*)\s*\}\}/uU", '<?php echo $this->lang(\'' . $this->lang_file . '.\'.$2) ?>', $html); // Replace short lang tags
         $html = preg_replace("/(?<!\{\\\})({$this->config['open_lang_tag']})\s*(.*)\s*\}\}/uU", '<?php echo $this->lang($2) ?>', $html); // Replace lang tags
-
+        
         # handles "{{ $code .." and "{{= $code .." cases
         $html = preg_replace("/(?<!\{\\\})({$this->config['open_echo_tag']})/u", '<?php echo ', $html); // Replace echo opening tag
         $html = preg_replace("/(?<!\{\\\})({$this->config['open_tag']})/u", '<?php ', $html);
-
+        
         # handles closing tags ".. }}"
         $html = preg_replace("/(?<!\{\\\})({$this->config['close_tag']})/u", ' ?>', $html);
-
+        
         # Remove escaping backslash
         $html = preg_replace("/(?<!\{\\\})(\{\\\})/u", "", $html);
-
-        # handles functions "{% ... %}"
-        $html = preg_replace_callback("#({$this->config['func_open_tag']})(.*?)({$this->config['func_close_tag']})#s", function ($matches) {
+        
+        # handles functions "{% ... %}" 
+        $html = preg_replace_callback("#({$this->config['func_open_tag']})(.*?)({$this->config['func_close_tag']})#s", function ($matches) { 
             list($func, $args) = array_pad( explode(" ", trim($matches[2]), 2), 2, "");
-
+            
             $e = Event::instance()->trigger("Nex.view.function.$func", $this, [$args], true)->event_object();
-
+            
             $tag = (substr($matches[1], -1) === '=') ? "<?php echo " : "<?php ";
             return isset($e['output']) ? $e['output'] : $tag."\$this->$func($args); ?>";
         }, $html);
-
+        
         Event::instance()->trigger("Nex.view.custom_tags.done", $this, [ &$html ]);
-
+        
         return $html;
     }
 

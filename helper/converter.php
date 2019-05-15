@@ -12,7 +12,7 @@ namespace Eckinox\Nex;
  * @update (05/03/2013) [ML] - 1.0.2 - added minToHour() method
  * 									   added hexToRGB() method
  * @update (06/06/2014) [DM] - 1.0.3 - added longToRGB() method
- *
+ * 
  *
  * 17/10/2009
  * This class was made to help convert units and values.
@@ -262,11 +262,11 @@ abstract class converter {
 
     /**
      * Outputs a CSV file working in Excel
-     *
+     * 
      * @param type $data        Array of data to convert
      * @param type $delimiter   Delimiter used to separate cells
      * @param type $enclosure   String enclosure
-     * @param type $download    Force download. If set to false, will simply output to screen.
+     * @param type $download    Force download. If set to false, will simply output to screen. 
      *                          If true, will output with current datetime stamp. If a string is given,
      *                          it's gonna be used as it's filename too.
      */
@@ -293,53 +293,53 @@ abstract class converter {
             return stream_get_contents($output);
         }
     }
-
+    
     public static function csvToArray($filename, $delimiter = null, $enclosure = '"', $header_as_key = false) {
         ini_set('memory_limit', '512M');
         ini_set('max_execution_time', 0);
         ini_set('auto_detect_line_endings', true);
-
+        
         # Detect delimiter automatically
         if (!$delimiter && file_exists($filename)) {
             $content = file_get_contents($filename);
             $excerpt = substr($content, 0, 1000);
-
+            
             $possible_delimiters = array(',', ';');
             $delimiters_count = array();
             foreach ($possible_delimiters as $delimiter)
                 $delimiters_count[$delimiter] = substr_count($excerpt, $delimiter);
-
+            
             $detected_delimiter = array_keys($delimiters_count, max($delimiters_count));
-
+            
             $delimiter = array_pop($detected_delimiter);
         }
-
+        
         # Convert to array
         $array = $keys = array();
-
+    
         if (is_file($filename) && ( ($handle = fopen($filename, 'r')) !== false )) {
             $line = 1;
-
+    
             while (( ($value = fgetcsv($handle, 0, $delimiter, $enclosure))) !== false) {
-
+    
                 if ( $header_as_key && ( $line === 1 ) ) {
                     $keys = $value;
                     $value = [];
                 }
-
+    
                 array_filter($value) && ($array[] = $value);
                 $line++;
             }
-
+    
             fclose($handle);
         }
-
+    
         if ($header_as_key) {
             foreach($array as $item) {
                 $retval[] = array_combine($keys, $item);
             }
         }
-
+    
         return isset($retval) ? $retval : $array;
     }
 

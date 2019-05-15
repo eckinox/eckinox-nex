@@ -2,9 +2,6 @@
 
 namespace Eckinox\Nex;
 
-use Eckinox\Eckinox,
-    Eckinox\config;
-
 /**
  * @author       Mikael Laforge <mikael.laforge@twikiconcept.com>
  * @version      1.3.1
@@ -18,7 +15,6 @@ use Eckinox\Eckinox,
  * 									Added $use_prefix argument to toFile() method
  */
 class Log {
-    use config;
 
     // Object instance of self
     protected static $instance = null;
@@ -44,7 +40,7 @@ class Log {
      * @uses Nex::config()
      */
     public function __construct() {
-
+        
     }
 
     /**
@@ -68,16 +64,15 @@ class Log {
      * @param string $file name of log file
      * @param string $message
      */
-    public function toFile($file, $content, $mode = 'a+', $use_prefix = false) {
+    public function toFile($file, $content, $mode = 'a+', $use_prefix = true) {
+        $dir_path = dirname(DOC_ROOT . VAR_PATH . Nex::config('log.dir') . $file);
+        $file = ($use_prefix ? Nex::config('log.file_prefix') : '') . basename($file);
 
-        $dir_path = dirname(Eckinox::path_var() . Nex::config('log.dir') . $file);
-        $file = ($use_prefix ? $this->config('Nex.log.file_prefix') : '') . basename($file);
-
-        #$chmod = octdec($this->config('Nex.log.chmod'));
+        $chmod = octdec(Nex::config('log.chmod'));
 
         // Create log directory if it doesnt exist
         if (!file_exists($dir_path)) {
-            mkdir($dir_path, 0775, true);
+            mkdir($dir_path, $chmod, true);
         }
 
         $path = $dir_path . DIRECTORY_SEPARATOR . $file;
@@ -89,7 +84,7 @@ class Log {
         fclose($handle);
 
         if (!$file_existed)
-            chmod($path, 0775);
+            chmod($path, $chmod);
 
         return true;
     }

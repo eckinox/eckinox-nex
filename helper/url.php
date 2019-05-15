@@ -77,6 +77,7 @@ abstract class url {
         // Add index.php or not - url rewriting
 #        $index = (static::config('Eckinox.system.url.rewrite') == false && $rewrite_rule == true && strpos($url, NEX . '/') === false && $url != NEX) ? NEX . '/' : '';
         $index = "";
+
         // If url is null, return current uri
         if ( $url === null ) {
             return static::site(ltrim(Router::instance()->uri(), '/'), $rewrite_rule);

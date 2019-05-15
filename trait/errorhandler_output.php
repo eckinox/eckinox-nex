@@ -3,7 +3,7 @@
 namespace Eckinox\Nex;
 
 trait errorhandler_output {
-    
+
     protected $error_lang_key = [
         \E_ERROR => 'error',
         \E_WARNING => 'warning',
@@ -21,8 +21,9 @@ trait errorhandler_output {
         \E_DEPRECATED => 'deprecated',
         \E_USER_DEPRECATED => 'user-deprecated'
     ];
-    
+
     public function level($error_code) {
+    
         switch($error_code) {
             case \E_COMPILE_ERROR:
             case \E_ERROR:
@@ -30,30 +31,30 @@ trait errorhandler_output {
             case \E_USER_ERROR:
             case \E_PARSE:
                 return ERRORHANDLER_LEVEL_ERROR;
-            
+
             case \E_WARNING:
             case \E_CORE_WARNING:
             case \E_USER_WARNING:
             case \E_COMPILE_WARNING:
                 return ERRORHANDLER_LEVEL_WARNING;
-            
+
             case \E_NOTICE:
             case \E_RECOVERABLE_ERROR:
                 return ERRORHANDLER_LEVEL_NOTICE;
-            
+
             default:
             case \E_STRICT:
             case \E_DEPRECATED:
             case \E_USER_DEPRECATED:
                 return ERRORHANDLER_LEVEL_DEBUG;
-                
+
         }
-        
+
     }
-    
+
     public function clean_stacktrace($stacktrace) {
         $retval = [];
-        
+
         foreach($stacktrace as $item) {
             $retval[] = [
                 'file'      => isset($item['file']) ? $item['file'] : null,
@@ -64,7 +65,7 @@ trait errorhandler_output {
                 'args'      => [],
             ];
         }
-        
+
         return $retval;
     }
 }

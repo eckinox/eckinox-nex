@@ -12,16 +12,16 @@ use Eckinox\Nex\{
 
 class HtmlNode implements \Iterator, \JsonSerializable {
     use config, lang;
-    
+
     const INSERT_MODE_APPEND   = 1;
     const INSERT_MODE_PREPEND  = 2;
-    
+
     public $name     = "";    # Can be access with selector ":name='blabla'"
     public $tag      = 'div'; # div is default tag when nothing is set
     public $attr     = [
         'style' => []
     ];
-    
+
     public $childs   = [];
 
     /**
@@ -31,20 +31,20 @@ class HtmlNode implements \Iterator, \JsonSerializable {
      *  --------------------------------------------------------------------------------------------
      *  single-tag                           Only render a single tag. Cannot contains any childrens
      *  force-tag-open       tag             Control the way the opening tag is rendered
-     *  force-tag-close      tag-close       "    "    "    "    closing   "    "    "  
+     *  force-tag-close      tag-close       "    "    "    "    closing   "    "    "
      *  no-attr                              Attributes will not be rendered
      *  no-id                                ID is not automatically given (* may be removed *)
      *  escape-tag-end                       If you need to echo the Node inside another string, it may be useful to escape the "/" char using "\/"
      */
-    
+
     public $options  = [];
     public $selected = null;
     public $content;
-    
+
     public function __construct() {
         $this->options = new Arrayobj();
     }
-    
+
     public static function stylesheet( $attr = [], $options = [] ) {
         return static::create('link', ( is_array($attr) ? $attr : [] ) + array_filter([
             'href'  => is_string($attr) ? $attr : null,
@@ -52,18 +52,18 @@ class HtmlNode implements \Iterator, \JsonSerializable {
             'type'  => "text/css"
         ]), [ 'tag-type' => 'single' ] + $options);
     }
-    
+
     public static function script( $attr = [], $options = [] ) {
         return static::create('script', ( is_array($attr) ? $attr : [] ) + array_filter([
             'src'  => is_string($attr) ? $attr : null,
             'type' => 'text/javascript',
         ]), $options);
     }
-    
+
     public static function span( $text, $attr = [], $options = [] ) {
         return static::create('span', $attr, $options)->text($text);
     }
-    
+
     public static function meta( $attr = [], $options = [] ) {
         return static::create('meta', $attr, $options);
     }
@@ -74,18 +74,18 @@ class HtmlNode implements \Iterator, \JsonSerializable {
         $attr && $obj->attr($attr);
         $obj->options = new Arrayobj($options);
         $obj->name    = $name;
-        
+
         if ( $custom = $obj->config("Nex.htmlnode.tags.$tag") ) {
             !empty($custom['tag'])        && ( $obj->tag = $custom['tag'] );
             !empty($custom['attributes']) && $obj->attr($custom['attributes']);
             !empty($custom['options'])    && is_array($custom['options']) && $obj->options->merge($custom['options']);
         }
-        
-        /* @TODO : Implements selector into $tag so you can create anything 
+
+        /* @TODO : Implements selector into $tag so you can create anything
          *         from string ( div.classname[attr=test] )
          */
         $tag = Stringobj::create($obj->tag);
-        
+
         if ( $tag->contains('.') ) {
             $tag = $tag->split('\.');
             $obj->tag = array_shift($tag);
@@ -103,11 +103,11 @@ class HtmlNode implements \Iterator, \JsonSerializable {
         libxml_clear_errors();
         return static::from_dom_node( $dom->getElementsByTagName($element) );
     }
-    
+
     public static function from_dom_node($source) {
         var_dump($source->tagName);
         $node = static::make();
-        
+
         if ( $source->hasChildNodes() ) {
             foreach($source->childNodes as $child) {
                 var_dump($child->tagName);
@@ -120,7 +120,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                 #var_dump($item);
             }
         }
-        
+
         return $node;
     }*/
 
@@ -130,7 +130,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
     }
 
     public function add_class( $classname ) {
-        
+
         if ( key_exists('class', array_change_key_case($this->attr, CASE_LOWER)) ) {
             $result = explode(' ', $this->attr['class']);
             if ( !in_array($classname, $result) ) {
@@ -164,21 +164,21 @@ class HtmlNode implements \Iterator, \JsonSerializable {
 
     public function render() {
         $attrlist = [];
-        
+
         foreach ( $this->attr as $key => $value ) {
-            
+
             if ( is_array($value) ) {
                 if (empty($value)) continue;
-                
+
                 if ($key === 'style') {
                     $style = [];
-                    
+
                     foreach($value as $k2 => $v2 ) {
                         $style[] = "$k2:$v2";
                     }
-                    
+
                     $attrlist[] = "$key=\"".implode(';', $style).'"';
-                
+
                 }
                 else {
                     $attrlist[] = implode(' ', $value);
@@ -191,11 +191,11 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                 # will output something like  <tag $value></tag>
                 $attrlist[] = $value;
             }
-            
+
         }
 
         $content = "";
-        
+
         foreach ( $this->childs as $item ) {
             if ( is_object($item) ) {
                 $content .= $item->render();
@@ -239,7 +239,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
         if ( !$args ) {
             return $this->content;
         }
-        
+
         $this->content = $args[0];
         return $this;
     }
@@ -263,11 +263,11 @@ class HtmlNode implements \Iterator, \JsonSerializable {
 
         return $this;
     }
-    
+
     public function text() {
         $args = func_get_args();
         $args = is_array($args[0] ?? null) ? $args[0] : $args;
-        
+
         if ( $args ) {
             $this->content = htmlspecialchars( $args[0], ENT_NOQUOTES );
         }
@@ -277,11 +277,11 @@ class HtmlNode implements \Iterator, \JsonSerializable {
 
         return $this;
     }
-    
+/*
     public function lang($key) {
         return $this->text( $this->lang»get_from($key) );
     }
-
+*/
     public function text_append( $set = null, $is_lang_key = false ) {
         if ( $set ) {
             $this->content .= htmlspecialchars($is_lang_key ? $this->lang($set) : $set, ENT_NOQUOTES);
@@ -289,7 +289,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
 
         return $this;
     }
-    
+
     public function append( ...$arguments ) {
         return $this->insert( static::INSERT_MODE_APPEND, ...$arguments);
     }
@@ -297,12 +297,12 @@ class HtmlNode implements \Iterator, \JsonSerializable {
     public function prepend( ...$arguments ) {
         return $this->insert( static::INSERT_MODE_PREPEND, ...(is_array($arguments) ? array_reverse($arguments) : $arguments));
     }
-    
+
     public function insert($insert_mode = self::INSERT_MODE_APPEND, ...$arguments) {
         if ( ! $arguments || !( $count = count($arguments) ) ) {
             return $this;
         }
-        
+
         $insert = function($content) use ( $insert_mode ) {
             if ( self::is_node($content) ) {
                 if ($insert_mode === static::INSERT_MODE_APPEND ) {
@@ -313,7 +313,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                 }
             }
         };
-    
+
         if ( $count == 1 && !is_array($arguments) ) {
             // Single node to add
             $insert($arguments);
@@ -338,8 +338,8 @@ class HtmlNode implements \Iterator, \JsonSerializable {
 
         return $this;
     }
-    
-    
+
+
     # Append next to current node.
     # <div id="1"></div>
     # <div id="2"></div>
@@ -351,7 +351,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
         if ( empty($args = func_get_args()) ) {
             return $this->attr;
         }
-        
+
         if (  is_array( $args[0] ) ) {
             # ->attr(['id' => 'hello', 'class' => 'even'])
             foreach($args[0] as $key => $value) {
@@ -359,14 +359,14 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                     case 'class' :
                         $this->add_class($value);
                         break;
-                    
+
                     case 'style' :
                         foreach($value as $var => $val) {
                             $this->css($var, $val);
                         }
-                        
+
                         break;
-                    
+
                     default:
                         $this->attr($key, is_array($value) ? implode(' ', $value) : $value);
                         break;
@@ -374,7 +374,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
             }
         }
         else {
-            if ( ($count = count($args)) === 1 ) { 
+            if ( ($count = count($args)) === 1 ) {
                 return $this->attr[$args[0]] ?? null;
             }
             # ->attr('id', 'hello')
@@ -384,20 +384,20 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                 ], $this->attr);
             }
         }
-        
+
         return $this;
     }
-    
+
     public function has_attr($key) {
         return isset($this->attr[$key]);
     }
-    
+
     /**
      * Recursive function, allowing both $array as param and $key, $value
      */
     public function css(...$arguments) {
         foreach($arguments as $item) {
-            
+
             if ( is_array($item) ) {
                 foreach($item as $key => $value) {
                     $this->css($key, $value);
@@ -407,7 +407,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
                 $this->attr['style'][$arguments[0]] = $arguments[1];
             }
         }
- 
+
         return $this;
     }
 
@@ -424,25 +424,25 @@ class HtmlNode implements \Iterator, \JsonSerializable {
     }
 
     public function delete() {
-        
+
     }
 
     public function count() {
         return count($this->childs);
     }
-    
+
     public function html_file($file) {
         # push variable into file
-        
+
         ob_start(function($buffer) {
             $this->html($buffer);
         });
-        
+
         include($file);
-        
+
         ob_end_flush();
     }
-    
+
     public function jsonSerialize() {
         return [
             'tag'     => $this->tag,
@@ -488,7 +488,7 @@ class HtmlNode implements \Iterator, \JsonSerializable {
         $var = ($key !== NULL && $key !== FALSE);
         return $var;
     }
-    
+
     public static function is_node($obj) {
         return (is_object($obj) && get_class($obj) === __CLASS__);
     }

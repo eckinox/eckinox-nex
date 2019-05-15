@@ -4,6 +4,7 @@
             "_default" : {
                 "prefix": "",
                 "charset": "utf8",
+                "engine" : "MyISAM",
                 "driver": "mysqli",
                 "type": "mysql"
             },

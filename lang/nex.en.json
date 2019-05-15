@@ -1,0 +1,44 @@
+{
+    "date" : {
+        "month": {
+            "january": "January",
+            "february": "February",
+            "march": "March",
+            "april": "April",
+            "may": "May",
+            "june": "June",
+            "july": "July",
+            "august": "August",
+            "september": "September",
+            "october": "October",
+            "november": "November",
+            "december": "December"
+        },
+
+        "day": {
+            "sunday": "Sunday",
+            "monday": "Monday",
+            "tuesday": "Tuesday",
+            "wednesday": "Wednesday",
+            "thursday": "Thursday",
+            "friday": "Friday",
+            "saturday": "Saturday"
+        }
+    },
+
+    "errorhandler" : {
+        "javascript" : {
+            "alert" : {
+                "error"   : "An error occured, please check your javascript console...",
+                "warning" : "A warning was thrown by the application, please check your javascript console...",
+                "notice"  : "A notice was thrown by the application, please check your javascript console..."
+            }
+        },
+
+        "html" : {
+            "function" : {
+                "closure" : "Anonymous function"
+            }
+        }
+    }
+}

@@ -330,12 +330,7 @@ abstract class html {
 
         $compiled = '';
         foreach ($attr as $key => $val) {
-            if ( is_numeric($key) ) {
-                $compiled .= " $val ";
-            }
-            else {
-                $compiled .= " $key = \"$val\" ";
-            }
+            $compiled .= " $key = \"" . ($val) . "\" ";
         }
 
         return $compiled;
@@ -373,11 +368,6 @@ abstract class html {
     public static function specialChars($str, $double_encode = TRUE) {
         // Do encode existing HTML entities (default)
         if ($double_encode === TRUE) {
-            if ( is_array($str) ) {
-                trigger_error('Trying to output an array as a string : '.json_encode($str), \E_USER_WARNING);
-                return false;
-            }
-
             $str = htmlspecialchars($str, ENT_QUOTES, 'UTF-8');
         } else {
             // Do not encode existing HTML entities

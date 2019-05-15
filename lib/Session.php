@@ -9,7 +9,7 @@ use Eckinox\{
 
 class Session {
 	use singleton, config;
-
+	
     // These variables cannot be set by user
     protected static $protects = [
         'session_id',
@@ -80,7 +80,7 @@ class Session {
 				array(self::$driver, 'gc')
 			);
 		}
-
+	
         // Name the session, this will also be the name of the cookie
 		session_name($this->config['name']);
 
@@ -154,7 +154,6 @@ class Session {
 				// Check expiration time to prevent users from manually modifying it
 				case 'expiration':
 					if (time() - $this->data['last_activity'] > ini_get('session.gc_maxlifetime')){
-                        dump("this the reason why session are so freaking short !!"); die();
 						$this->status = self::EXPIRED ;
 						return false;
 					}
@@ -252,10 +251,10 @@ class Session {
 		foreach ($keys as $key => $value){
 			if (in_array($key, self::$protects))
 				continue;
-
+			
 			arr::set($this->data, $key, $value);
 		}
-
+		
     }
 
     public function exist($key) { return array_key_exists($key, $this->data); }
@@ -286,8 +285,7 @@ class Session {
 		// Configure garbage collection
 		ini_set('session.gc_probability', (int) $this->config['gc_probability']);
 		ini_set('session.gc_divisor', 100);
-		ini_set('session.gc_maxlifetime', $expire = $this->config['expiration'] ?: 86400);
-        ini_set('session.cookie_lifetime', $expire);
+		ini_set('session.gc_maxlifetime', ($this->config['expiration'] == 0) ? 86400 : $this->config['expiration']);
 	}
 
 	/**

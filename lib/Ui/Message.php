@@ -31,15 +31,17 @@ class Message {
         $this->session_key = $session_key;
         # $this->session($this->session_key, null);
         $this->message_type = $this->config('Nex.ui.message.type');
-        $this->message_list = $this->session( $this->session_key ) ?: [];
+        $this->message_list = array_filter( $this->session( $this->session_key ) ?: [] );
     }
 
-    public function add($key, $message, $type = self::TYPE_ERROR, $persistent = false, $priority = 100) {
+    public function add($key, $message, $title = "", $type = self::TYPE_ERROR, $persistent = false, $priority = 100) {
         $this->message_list[$key] = [
             'type'       => $type,
+            'type_str'   => $this->message_type[$type],
             'content'    => $message,
             'priority'   => $priority,
-            'persistent' => $persistent
+            'persistent' => $persistent,
+            'title'      => $title
         ];
 
         if ( $persistent ) {
@@ -47,6 +49,11 @@ class Message {
         }
 
         return $this;
+    }
+
+    public function clear() {
+        $this->message_list = [];
+        $this->session($this->session_key, null);
     }
 
     public function remove($key) {
@@ -62,14 +69,12 @@ class Message {
     public function output($type = self::TYPE_ALL) {
         $empty = true;
 
-        $this->main_node = HtmlNode::create('div', [
-            'class' => "nex-ui-message ".( $type ? $this->message_type[ $type ]."-type" : ""),
-        ]);
+        $this->main_node = HtmlNode::create('nex-message');
 
         if ( $list = $this->message_list() ) {
-            Arrayobj::order_by($list, 'priority');
 
-            foreach($type ? (array) $type : range(TYPE_ALL, TYPE_SUCCESS) as $type) {
+            Arrayobj::order_by($list, 'priority');
+            foreach($type ? (array) $type : range(static::TYPE_ALL, static::TYPE_SUCCESS) as $type) {
                 foreach($list as $key => $item) {
                     if ( $item['type'] == $type ) {
                         $this->main_node->append(
@@ -94,8 +99,8 @@ class Message {
         return $this->has(static::TYPE_ERROR);
     }
 
-    public function error($key, $message, $persistent = false, $priority = 100) {
-        return $this->add($key, $message, static::TYPE_ERROR, $persistent, $priority);
+    public function error($key, $message, $title = "", $persistent = false, $priority = 100) {
+        return $this->add($key, $message, $title, static::TYPE_ERROR, $persistent, $priority);
     }
 
     public function render_error() {
@@ -106,8 +111,8 @@ class Message {
         return $this->has(static::TYPE_WARNING);
     }
 
-    public function warning($key, $message, $persistent = false, $priority = 100) {
-        return $this->add($key, $message, static::TYPE_WARNING, $persistent, $priority);
+    public function warning($key, $message, $title = "", $persistent = false, $priority = 100) {
+        return $this->add($key, $message, $title, static::TYPE_WARNING, $persistent, $priority);
     }
 
     public function render_warning() {
@@ -118,8 +123,8 @@ class Message {
         return $this->has(static::TYPE_INFO);
     }
 
-    public function info($key, $message, $persistent = false, $priority = 100) {
-        return $this->add($key, $message, static::TYPE_INFO, $persistent, $priority);
+    public function info($key, $message, $title = "", $persistent = false, $priority = 100) {
+        return $this->add($key, $message, $title, static::TYPE_INFO, $persistent, $priority);
     }
 
     public function render_info() {
@@ -130,8 +135,8 @@ class Message {
         return $this->has(static::TYPE_SUCCESS);
     }
 
-    public function success($key, $message, $persistent = false, $priority = 100) {
-        return $this->add($key, $message, static::TYPE_SUCCESS, $persistent, $priority);
+    public function success($key, $message, $title = "", $persistent = false, $priority = 100) {
+        return $this->add($key, $message, $title, static::TYPE_SUCCESS, $persistent, $priority);
     }
 
     public function render_success() {
@@ -148,7 +153,7 @@ class Message {
         $item || ( $item = $this->message_list($key) );
 
         $message = HtmlNode::create('div', [
-            'class' => implode(' ', [ "message-item", "type-".$this->message_type[ $item['type'] ] ])
+            'class' => implode(' ', [ "nex-message-item", "type-".$this->message_type[ $item['type'] ] ])
         ])->append( HtmlNode::create('span')->html( $item['content'] ) );
 
         return $wrap ? $this->output_wrapper()->append($message) : $message;

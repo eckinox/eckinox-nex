@@ -92,7 +92,7 @@ class JavascriptConsole {
 
     public function show_toolbar($lang_key, $color) {
         return "<div style='position:fixed;text-shadow:1px 1px 1px #000;text-align:center;opacity:0.77;bottom:0;left:0;right:0;font-size:11px;padding:4px;z-index:1000000;background:$color;color:#fff;font-weight:bold;font-family: Helvetica;text-transform: uppercase;line-height: 17px;'>".
-            $this->lang("Nex.errorhandler.javascript.alert.$lang_key").
+            $this->lang("nex.errorhandler.javascript.alert.$lang_key").
         "</div>";
     }
 }

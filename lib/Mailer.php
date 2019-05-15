@@ -1,14 +1,28 @@
 <?php
 
 namespace Eckinox\Nex;
-use Eckinox\config;
 
-include(VENDOR_DIR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'PHPMailerAutoload.php');
+/**
+ * @author       Mikael Laforge <mikael.laforge@gmail.com>
+ * @version      1.1.0
+ * @package      Nex
+ * @subpackage   core
+ * @copyright    Copyright (c) 2012
+ *
+ * @update (12/12/2011) [Mikael Laforge] 1.0 - Script creation
+ * @update (15/10/2013) [ML] 1.0.1 - Now support more configs, for SMTP
+ * @update (29/03/2016) [DM] 1.1.0 - Updated to match latest version of PHPMailer (5.x)
+ *
+ * @todo should uses drivers
+ *
+ * This class is used to wrap the external librairie PHPMailer
+ */
 
-class Mailer extends \PHPMailer
+include(EXT_PATH . 'php' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'class.phpmailer.php');
+require_once(EXT_PATH . 'php' . DIRECTORY_SEPARATOR . 'PHPMailer' . DIRECTORY_SEPARATOR . 'class.smtp.php');
+
+class Mailer extends PHPMailer
 {
-    use config;
-
     /**
      * Constructor
      * @param boolean $exceptions Should we throw external exceptions?
@@ -16,15 +30,15 @@ class Mailer extends \PHPMailer
     public function __construct($exceptions = false)
     {
         parent::__construct($exceptions);
-        $mail = $this->config('Nex.mail');
+        $mail = Nex::config('mail');
 
         // Set defaults
         $this->CharSet = 'UTF-8';
         $this->WordWrap = 50;
-        $this->From = $this->config('Nex.mail._default.from');
-        $this->FromName = $this->config('Nex.mail._default.from_name');
+        $this->From = Nex::config('mail._default.from');
+        $this->FromName = Nex::config('mail._default.from_name');
 
-        $config = $this->config('Nex.mailer');
+        $config = Nex::config('mailer');
         if ($config) {
             $this->Mailer = $config['method'];
 
@@ -42,7 +56,7 @@ class Mailer extends \PHPMailer
         }
 
         // Adding BCCs
-        ($bcc = $this->config('Nex.mail.debug')) && $this->config('Nex.system.debug.email') && $this->addBccList(explode(';', $bcc));
+        ($bcc = Nex::config('mail.debug')) && Nex::config('system.debug.email') && $this->addBccList(explode(';', $bcc));
     }
 
     public function addBccList($list)

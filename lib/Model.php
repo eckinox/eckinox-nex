@@ -7,7 +7,7 @@ use Eckinox\reg,
     Eckinox\Reflection,
     Eckinox\apps;
 
-abstract class Model extends Database implements \Iterator, \ArrayAccess, \Countable {
+abstract class Model extends Database implements \Iterator, \ArrayAccess, \Countable, \JsonSerializable {
     use reg;
 
     public static $parentOf = [];
@@ -15,6 +15,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
     public static $friendOf = [];
 
     protected $reflection = null;
+    public $tablename = "";
 
     // Model used
     protected $model_data;
@@ -48,7 +49,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
     public static function factory($model) {
 
         if ( strpos($model, '->') !== false ) {
-            list($model, self::$next_self_alias) = explode('->', str_replace(' ', '', $model));
+            list($model, static::$next_self_alias) = explode('->', str_replace(' ', '', $model));
         }
 
         $model = static::informations($model);
@@ -70,16 +71,18 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         $this->model_key = apps::iterable_apps_key($this);
 
         if ( ! $this->registry_has('Nex.model.'.$this->model_key) ) {
+            $this->reflection( Reflection::instance()->reflect(static::class) );
+
             Event::instance()->on('Nex.model.register', function( $e, $model_key ) {
                 $this->registry('Nex.model.'.$model_key, [ 'class' => static::class, 'tablename' => $this->tablename ] + get_class_vars(static::class));
             }, [], 'once')->trigger('Nex.model.register', $this, [ $this->model_key ])->off('Nex.model.register', 'once');
         }
 
-        $this->self_alias = self::$next_self_alias;
+        $this->self_alias = static::$next_self_alias;
 
         $this->from($this->model_key . '->' . $this->self_alias);
 
-        self::$next_self_alias = 'SELF';
+        static::$next_self_alias = 'SELF';
 
         $this->primary_key($this->primary_key);
     }
@@ -93,9 +96,6 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         return $path;
     }
 
-    /**
-     * Destructor
-     */
     public function __destruct() {
         $this->free_memory();
     }
@@ -139,12 +139,16 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
     /**
      *  This function is used to call some code after loading. This allows an easy hook system that relies on overloading
      */
-    public function loading_begin() {}
+    public function loading_begin() {
+        Event::instance()->trigger("{$this->model_key}.loading_begin", $this, [ $this->model_key ]);
+    }
 
     /**
      *  This function is used to call some code after loading. This allows an easy hook system that relies on overloading
      */
-    public function loading_done() {}
+    public function loading_done() {
+        Event::instance()->trigger("{$this->model_key}.loading_done", $this, [ $this->model_key ]);
+    }
 
     /**
      *  This private function allows us to overload load(), load_using() and load_all
@@ -157,12 +161,12 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
 
         $this->free_memory();
         $this->rewind();
+        $this->loading_done();
 
         // if $this->from was cleared, add it back
-        if ($this->getQueryComponent('from') === [])
+        if ($this->getQueryComponent('from') === []) {
             $this->from($this->model_key . '->' . $this->self_alias);
-
-        $this->loading_done();
+        }
 
         return $this;
     }
@@ -280,11 +284,10 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
      * @param int $id
      */
     public function unload($id = null) {
-        if ($id === '' || $id === null) {
-            $id = $this->getP($this->current_primary_key);
+        if ( $id !== false && $this->find($id) ) {
+            unset($this->rows[$this->key()], $this->find_idx[$this->primary_key][$id]);
         }
 
-        unset($this->rows[$this->key()]);
         return $this;
     }
 
@@ -384,14 +387,15 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
 
         // If $id is null insert new row
         if ($mode != MODEL_FORCE_UPDATE && ($id === '' || $id === null || $mode == MODEL_FORCE_CREATE)) {
-            if ($this->insert($this->model_key, $unsaved)) {
+            if ( $this->insert($this->model_key, $unsaved) ) {
                 // Reload data
-                if ($reload == true) {
+                if ( $reload == true ) {
                     $this->load($this->lastInsertId());
                 }
 
-                if ($id === '' || $id === null)
+                if ( $id === '' || $id === null ) {
                     $this->setP($this->current_primary_key, $this->lastInsertId());
+                }
             }
         }
         // Update
@@ -403,8 +407,9 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         $this->clearUnsaved();
 
         // if $this->from was cleared, add it back
-        if ($this->getQueryComponent('from') === [])
+        if ($this->getQueryComponent('from') === []) {
             $this->from($this->model_key . '->' . $this->self_alias);
+        }
 
         return $this;
     }
@@ -691,39 +696,43 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
     // Direct properties methods
     // -------------------------------------------------------------------------
 
+    public function jsonSerialize () {
+        return $this->rows;
+    }
+
     /**
      * Return row at current index position
      */
     public function getRow() {
-        return $this->rows[$this->i] ?? [];
+        return $this->rows[$this->i];
     }
 
     public function getModelRow() {
-        return self::factory($this->model_key)->load_row($this->getRow());
+        return static::factory($this->model_key)->load_row($this->getRow());
     }
 
     public function duplicate($unsaved = false, $rows = []) {
-        return self::factory($this->model_key)->merge_with($rows ?: $this->rows, $unsaved);
+        return static::factory($this->model_key)->merge_with($rows ?: $this->rows, $unsaved);
     }
 
     public static function instanciate_from_key($model_key) {
-        $app = [];
+        $dir = [ MODEL_NS ];
+        $ns = [];
 
-        $ns = array_map(function($key) use (&$app) {
-            $search_app = implode('\\', array_merge($app, [ $key ]));
-
-            if ( $appkey = apps::keyname($search_app) ) {
-                $app[] = $appkey;
-                return false;
+        foreach(explode('.', $model_key) as $key) {
+            if ($apps = apps::keyname($key)) {
+                $ns[] = $apps;
             }
+            else {
+                if ($dir) {
+                    $ns[] = array_pop($dir);
+                }
+                $ns[] = ucfirst($key);
+            }
+        }
 
-            return $key;
-        }, explode('.', $model_key));
-
-        $ns = array_filter(array_map('ucfirst', $ns));
         $class = array_pop($ns);
-        $classname = implode("\\", array_merge($app, [ MODEL_NS ], $ns , [ $class ]));
-
+        $classname = implode("\\", array_merge($ns, [ $class ]));
         new $classname();
     }
 
@@ -822,7 +831,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
                 return $this->rows[$this->i][$name];
         }
 
-        // Register modificationactive
+        // Register modification
         if ($to_save) {
             $this->unsaved[$this->i][$name] = $value;
         }
@@ -868,7 +877,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         }
 
         if ($order_by) {
-            foreach($order_by as $field => $order) {
+            foreach((array) $order_by as $field => $order) {
                 $this[$name]->orderBy("SELF.".( ! is_numeric($field) ? $field : $order), is_numeric($field) ? 'ASC' : $order);
             }
         }
@@ -887,14 +896,14 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         return $this;
     }
 
-    protected function load_relationFriendOf($name, $id, $foreign_field, $bridge_field, $bridge_foreign_field, $bridge_model, $model, $function = null, $load_function = "load_all", $order_by = null, $additional_fields = []) {
-        $field_list = ['SELF.*'];
+    protected function load_relationFriendOf($name, $id, $foreign_field, $bridge_field, $bridge_foreign_field, $bridge_model, $model, $function = null, $load_function = "load_all", $order_by = null, $bridge_field_list = [], $bridge_field_prepend = "bridge_") {
+        $fields = [ "SELF.*" ];
 
-        foreach($additional_fields as $fields) {
-            $field_list[] = "B.$fields";
+        foreach ($bridge_field_list as $field) {
+            $fields[] = "B.$field as bridge_$field";
         }
 
-        $this[$name]->field(implode(', ', $field_list))
+        $this[$name]->field(implode(',', $fields))
             ->join($bridge_model . '->B', 'SELF.' . $foreign_field, 'B.' . $bridge_foreign_field, 'INNER')
             ->where("B.$bridge_field", $id);
 
@@ -903,6 +912,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         }
 
         $this[$name]->$load_function();
+
         return $this;
     }
 
@@ -921,6 +931,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
     }
 
     public function each($callback) {
+        $pointer = $this->key();
         $this->rewind();
 
         while ($this->current()) {
@@ -928,7 +939,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
             $this->next();
         }
 
-        $this->rewind();
+        $this->at($pointer);
         return $this;
     }
 
@@ -972,6 +983,10 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
         return $this->model_key;
     }
 
+    public function reflection($set = null) {
+        return $set !== null ? $this->reflection = $set : $this->reflection;
+    }
+
     /**
      * Check for relations
      * @param string $name name of variable called
@@ -999,7 +1014,7 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
                 break;
 
             case 'friend':
-                $this->load_relationFriendOf($name, $this->rows[$this->i][$relation_infos['key']], $relation_infos['f_key'], $relation_infos['bridge_key'], $relation_infos['bridge_f_key'], $relation_infos['bridge'], $relation_infos['model'], $relation_infos['function'], $relation_infos['load_function'], $relation_infos['order_by'], $relation_infos['bridge_fields']);
+                $this->load_relationFriendOf($name, $this->rows[$this->i][$relation_infos['key']], $relation_infos['f_key'], $relation_infos['bridge_key'], $relation_infos['bridge_f_key'], $relation_infos['bridge'], $relation_infos['model'], $relation_infos['function'], $relation_infos['load_function'], $relation_infos['order_by'], $relation_infos['bridge_field_list'], $relation_infos['bridge_field_prepend']);
                 break;
         }
 
@@ -1053,7 +1068,8 @@ abstract class Model extends Database implements \Iterator, \ArrayAccess, \Count
                 'function' => $infos['function'] ?? null,
                 'load_function' => $infos['load_function'] ?? "load_all",
                 'order_by' => $infos['order_by'] ?? null,
-                'bridge_fields' => $infos['bridge_fields'] ?? []
+                'bridge_field_list' => $infos['bridge_field_list'] ?? [],
+                'bridge_field_prepend' => $infos['bridge_field_prepend'] ?? 'bridge_',
             );
         }
 

@@ -27,6 +27,22 @@
             </div>
 
             <div class="nex-exception-detail-wrapper">
+
+
+
+                <div class="nex-exception-item nex-exception-margin">
+                    <label>Source code [ error code {{= $errno }} ]</label>
+
+                    {{ if($file): }}
+                        <div class="nex-exception-filesource">
+                            <label>{{=$this->lang('Nex.errorhandler.html.filesource')}}</label>
+                            <div class="nex-exception-codeblock">{{ foreach($this->_filesource([ 'file' => $file, 'line' => $line ]) as $key => $content): }}<div class="nex-exception-srcline {{= $key == $line ? 'current' : ''}}" data-nex-exception-line="{{= $key }}"><div class="src-line-number">{{= $key }}</div> <div class="src-line-content">{{= $content }}</div></div>{{ endforeach }}</div>
+                        </div>
+                    {{ endif }}
+                </div>
+
+
+
                 <div class="nex-exception-stacktrace">
                     <div class="nex-exception-parsed-stacktrace nex-exception-margin">
                         <label>Stack trace [ error code {{= $errno }} ]</label>
@@ -43,7 +59,7 @@
                                 {{ if($item['file']): }}
                                 <div class="nex-exception-filesource">
                                     <label>{{=$this->lang('Nex.errorhandler.html.filesource')}}</label>
-                                    <div class="nex-exception-codeblock">{{ foreach($this->_filesource($item) as $line => $content): }}<div class="nex-exception-srcline {{=$item['line'] == $line ? 'current' : ''}}" data-nex-exception-line="{{= $line }}">{{= "$line $content" }}</div>{{ endforeach }}</div>
+                                    <div class="nex-exception-codeblock">{{ foreach($this->_filesource($item) as $line => $content): }}<div class="nex-exception-srcline {{=$item['line'] == $line ? 'current' : ''}}" data-nex-exception-line="{{= $line }}"><div class="src-line-number">{{= $line }}</div> <div class="src-line-content">{{= $content }}</div></div>{{ endforeach }}</div>
                                 </div>
                                 {{ endif }}
                             </div>
@@ -57,19 +73,19 @@
 
                 <div class="nex-exception-inline">
                     <div class="nex-exception-request nex-exception-margin">
-                        <label>$_SERVER</label>
+                        <label>$_SERVER ({{=count($_SERVER ?? [])}})</label>
                         <pre>{{=$server}}</pre>
                     </div>
                     <div class="nex-exception-request nex-exception-margin">
-                        <label>$_SESSION</label>
+                        <label>$_SESSION ({{=count($_SESSION ?? [])}})</label>
                         <pre>{{= $session ?: "[]" }}</pre>
                     </div>
                     <div class="nex-exception-request nex-exception-margin">
-                        <label>$_GET</label>
+                        <label>$_GET ({{=count($_GET ?? [])}})</label>
                         <pre>{{=$get}}</pre>
                     </div>
                     <div class="nex-exception-request nex-exception-margin">
-                        <label>$_POST</label>
+                        <label>$_POST  ({{=count($_POST ?? [])}})</label>
                         <pre>{{=$post}}</pre>
                     </div>
                 </div>

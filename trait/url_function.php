@@ -1,12 +1,9 @@
 <?php namespace Eckinox\Nex;
 
-use Eckinox\{
-    Event,
-    Reflection
-};
+use Eckinox\Reflection,
+    Eckinox\Annotation;
 
 trait url_function {
-
     protected $url_default = "index";
 
     protected $url_type = "function";
@@ -22,8 +19,6 @@ trait url_function {
             $this->url_current = $this->url_default;
         }
 
-        Event::instance()->trigger('Nex.url_route', $this, [ $this->url_current, $uri ]);
-
         return $this->{$this->url_current}($uri);
     }
 
@@ -31,4 +26,5 @@ trait url_function {
         # There should be a reflection check here or something to protected
         return Reflection::instance()->functions($this);
     }
+
 }

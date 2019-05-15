@@ -22,18 +22,14 @@ class Html {
     public function __construct($config = []) {
         $this->config = array_merge($config, $this->config);
 
-        /*register_shutdown_function(function() {
+        register_shutdown_function(function() {
             if ( $this->rendered() ) {
                 echo $this->view('/errorhandler/drivers/html_css' );
             }
-        });*/
+        });
     }
 
     public function error($errno, $msg, $file, $line, $backtrace = null) {
-        if ( ! $this->rendered() ) {
-            echo $this->view('/errorhandler/drivers/html_css' );
-        }
-
         $this->rendered(true);
 
         $type = $this->type[$this->level($errno)];

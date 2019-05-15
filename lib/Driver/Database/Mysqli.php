@@ -25,8 +25,8 @@ class Mysqli extends \Eckinox\Nex\Driver\Database\Mysql {
     public function query($sql) {
         try {
             mysqli_real_query(static::$connection[$this->database], $sql);
+
             if (mysqli_errno(static::$connection[$this->database])) {
-                dump($sql);
                 throw new \Exception(mysqli_error(static::$connection[$this->database]), mysqli_errno(static::$connection[$this->database]));
             }
 

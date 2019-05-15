@@ -1,45 +1,44 @@
 {
-    "{Nex.api}": {
-        "Facebook": {
-            "app": {
+    "{Nex.api}": {  
+        "Facebook": {  
+            "app": {  
                 "cookie": "1"
             },
-            "login_params": {
+            "login_params": {  
                 "canvas": "0"
             }
         },
-
+        
         "Google": {
             "recaptcha2": {
                 "site_key": null,
                 "secret": null
             }
         },
-
-        "Paypal": {
+        
+        "Paypal": {  
             "host": "www.paypal.com",
             "sandbox_host": "www.sandbox.paypal.com",
             "sandbox": "1",
             "use_ssl": "1"
         },
-
-        "CanadaPost": {
+        
+        "CanadaPost": {  
             "sandbox": "1",
             "app": {
                 "username": null,
                 "password": null
             }
         },
-
-        "Eckinox": {
+        
+        "Eckinox": {  
             "auth": {},
             "useragent": "PHP-NEX-API/1.0.0",
-            "path": {
+            "path": {  
                 "url": "https://api.eckinox.net/",
                 "base": "rest",
                 "facebook": "facebook",
-                "domain" : "domain",
-                "image": "image"
+                "domain" : "domain"
             }
         }
     }

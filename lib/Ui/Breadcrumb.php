@@ -30,21 +30,23 @@ class Breadcrumb {
         $annotation = Annotation::instance();
         $list = $annotation->get_methods_list();
 
-        if ( $self = $list[ get_class($obj) ]['methods'][$obj->url_current] ?? false ) {
-            if ( $self['breadcrumb'] ?? false ) {
-                $parent  = $self;
-                $stack[] = $self;
+        foreach($list[ get_class($obj) ]['methods'] as $method) {
+            if ( $obj->url_current === ( $method['name'] ?? false ) ) {
+                if ( $method['breadcrumb'] ?? false ) {
+                    $parent  = $method;
+                    $stack[] = $method;
 
-                while ( false !== $parent['breadcrumb']['parent'] ?? false ) {
-                    $stack[] = $parent = $annotation->get_from_method_name($parent['breadcrumb']['parent']) ;
+                    while ( false !== $parent['breadcrumb']['parent'] ?? false ) {
+                        $stack[] = $parent = $annotation->get_from_method_name($parent['breadcrumb']['parent']) ;
 
-                    if ( ! $parent or empty($parent['breadcrumb']) ) {
-                        break;
-                    }
+                        if ( ! $parent or empty($parent['breadcrumb']) ) {
+                            break;
+                        }
 
-                    if ( $max_count-- === 0) {
-                        trigger_error("Maximum recursivity reached while looking for breadcrumb's parent of {$this->url_current}");
-                        exit();
+                        if ( $max_count-- === 0) {
+                            trigger_error("Maximum recursivity reached while looking for breadcrumb's parent of {$this->url_current}");
+                            exit();
+                        }
                     }
                 }
             }
